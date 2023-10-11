@@ -2,7 +2,7 @@
 resource "azurerm_resource_group" "terraform-azure-resource-group" {
     name = var.resource_group
     location = var.location
-    tags = {}
+    tags = var.tags
     }
 
 resource "azurerm_virtual_network" "terraform-azure-virtual_network" {
@@ -13,7 +13,7 @@ resource "azurerm_virtual_network" "terraform-azure-virtual_network" {
   resource_group_name = azurerm_resource_group.terraform-azure-resource-group.name
   address_space = var.address_space
   location = azurerm_resource_group.terraform-azure-resource-group.location
-  tags = {}
+  tags = var.tags
 }
 
 resource "azurem_subnet" "terraform-azure-subnet" {
@@ -44,7 +44,6 @@ resource "aviatrix_transit_gateway" "transit_gateway_azure" {
   connected_transit        = true
   enable_transit_firenet   = true
   enable_bgp_over_lan = true
-  #enable_egress_transit_firenet    = true 
   gw_name    = var.gw_name
   gw_size    = var.instance_size
   ha_subnet  = var.ha_gw_subnet
