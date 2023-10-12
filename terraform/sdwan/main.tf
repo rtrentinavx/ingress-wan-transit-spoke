@@ -2,7 +2,7 @@
 resource "azurerm_resource_group" "terraform-azure-resource-group" {
     name = var.resource_group
     location = var.location
-    tags = {}
+    tags = var.tags
     }
 
 resource "azurerm_virtual_network" "terraform-azure-virtual_network" {
@@ -13,7 +13,7 @@ resource "azurerm_virtual_network" "terraform-azure-virtual_network" {
   resource_group_name = azurerm_resource_group.terraform-azure-resource-group.name
   address_space = var.address_space
   location = azurerm_resource_group.terraform-azure-resource-group.location
-  tags = {}
+    tags = var.tags
 }
 
 resource "azurem_subnet" "terraform-azure-subnet" {
@@ -25,6 +25,7 @@ resource "azurem_subnet" "terraform-azure-subnet" {
   virtual_network_name = azurerm_virtual_network.terraform-azure-virtual_network.name
   name = each.value.name
   address_prefixes = each.value.address_prefixes
+      tags = var.tags
 }
 
 resource "azurerm_route_table" "route_table" {
@@ -39,6 +40,7 @@ resource "azurerm_route_table" "route_table" {
     address_prefix = "0.0.0.0/0"
     next_hop_type  = "None"
   }
+      tags = var.tags
 }
 
 resource "azurerm_subnet_route_table_association" "subnet_route_table_association" {
@@ -49,3 +51,4 @@ resource "azurerm_subnet_route_table_association" "subnet_route_table_associatio
   route_table_id = azurerm_route_table.route_table[each.key].id
   subnet_id      = azurem_subnet.terraform-azure-subnet.subnet_id[each.key]
 }
+

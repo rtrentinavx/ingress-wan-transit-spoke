@@ -36,3 +36,9 @@ variable "fw_instance_size" { type = string }
 variable "firewall_name" { type = string }
 variable "firewall_username" { type = string }
 variable "fw_tags" { type = map(string) }
+variable "rg-keyvault" {
+  type = string
+}
+variable "keyvault_name" {
+  type = string
+}

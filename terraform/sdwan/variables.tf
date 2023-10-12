@@ -8,3 +8,6 @@ variable "subnet" {
     address_prefixes                      = list(string)
   }))
 }
+variable "tags" {
+  type = map(string)
+}

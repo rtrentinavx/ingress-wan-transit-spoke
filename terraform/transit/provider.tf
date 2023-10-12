@@ -22,7 +22,7 @@ terraform {
 provider "aviatrix" {
   controller_ip           = var.avx_controller_public_ip
   username                = var.avx_controller_admin
-  password                = var.avx_controller_admin_password
+  password                = data.azurerm_key_vault_secret.secret-avx-admin-password.value
   skip_version_validation = true
   verify_ssl_certificate  = false
 }
