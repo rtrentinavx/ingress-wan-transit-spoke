@@ -3,7 +3,6 @@ variable "avx_controller_admin" {
   default = "admin"
 }
 variable "avx_controller_public_ip" { type = string }
-variable "avx_controller_admin_password" { type = string }
 variable "location" {
   type = string
 }

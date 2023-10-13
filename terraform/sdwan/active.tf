@@ -56,10 +56,7 @@ resource "azurerm_virtual_machine" "customactivefgtvm" {
     enabled     = true
     storage_uri = azurerm_storage_account.fgtstorageaccount.primary_blob_endpoint
   }
-
-  tags = {
-    environment = "Terraform Demo"
-  }
+  tags = var.tags
 }
 
 
@@ -120,10 +117,7 @@ resource "azurerm_virtual_machine" "activefgtvm" {
     enabled     = true
     storage_uri = azurerm_storage_account.fgtstorageaccount.primary_blob_endpoint
   }
-
-  tags = {
-    environment = "Terraform Demo"
-  }
+  tags = var.tags
 }
 
 data "template_file" "activeFortiGate" {

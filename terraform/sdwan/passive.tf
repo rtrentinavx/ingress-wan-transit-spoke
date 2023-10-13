@@ -3,7 +3,7 @@ resource "azurerm_virtual_machine" "custompassivefgtvm" {
   count                        = var.custom ? 1 : 0
   name                         = "custompassivefgt"
   location                     = var.location
-  resource_group_name          = azurerm_resource_group.myterraformgroup.name
+  resource_group_name          = azurerm_resource_group.terraform-azure-resource-group.name
   network_interface_ids        = [azurerm_network_interface.passiveport1.id, azurerm_network_interface.passiveport2.id, azurerm_network_interface.passiveport3.id]
   primary_network_interface_id = azurerm_network_interface.passiveport1.id
   vm_size                      = var.size
@@ -44,10 +44,7 @@ resource "azurerm_virtual_machine" "custompassivefgtvm" {
     enabled     = true
     storage_uri = azurerm_storage_account.fgtstorageaccount.primary_blob_endpoint
   }
-
-  tags = {
-    environment = "Terraform Demo"
-  }
+  tags = var.tags
 }
 
 
@@ -56,7 +53,7 @@ resource "azurerm_virtual_machine" "passivefgtvm" {
   count                        = var.custom ? 0 : 1
   name                         = "passivefgt"
   location                     = var.location
-  resource_group_name          = azurerm_resource_group.myterraformgroup.name
+  resource_group_name          = azurerm_resource_group.terraform-azure-resource-group.name
   network_interface_ids        = [azurerm_network_interface.passiveport1.id, azurerm_network_interface.passiveport2.id, azurerm_network_interface.passiveport3.id]
   primary_network_interface_id = azurerm_network_interface.passiveport1.id
   vm_size                      = var.size
@@ -107,10 +104,7 @@ resource "azurerm_virtual_machine" "passivefgtvm" {
     enabled     = true
     storage_uri = azurerm_storage_account.fgtstorageaccount.primary_blob_endpoint
   }
-
-  tags = {
-    environment = "Terraform Demo"
-  }
+  tags = var.tags
 }
 
 data "template_file" "passiveFortiGate" {
@@ -133,7 +127,7 @@ data "template_file" "passiveFortiGate" {
     clientid        = var.client_id
     clientsecret    = var.client_secret
     adminsport      = var.adminsport
-    rsg             = azurerm_resource_group.myterraformgroup.name
+    rsg             = azurerm_resource_group.terraform-azure-resource-group.name
     clusterip       = azurerm_public_ip.ClusterPublicIP.name
     routename       = azurerm_route_table.internal.name
   }
