@@ -7,7 +7,7 @@ resource "azurerm_route_table" "mgmt" {
 
 resource "azurerm_route" "default" {
   name                   = "default"
-  resource_group_name = azurerm_resource_group.resouce_group_ingress_vnet.name
+  resource_group_name    = azurerm_resource_group.resouce_group_ingress_vnet.name
   route_table_name       = azurerm_route_table.internal.name
   address_prefix         = "0.0.0.0/0"
   next_hop_type          = "VirtualAppliance"
@@ -37,7 +37,7 @@ resource "azurerm_route_table" "internal" {
 
 resource "azurerm_route" "default" {
   name                   = "default"
-  resource_group_name = azurerm_resource_group.resouce_group_ingress_vnet.name
+  resource_group_name    = azurerm_resource_group.resouce_group_ingress_vnet.name
   route_table_name       = azurerm_route_table.internal.name
   address_prefix         = "0.0.0.0/0"
   next_hop_type          = "VirtualAppliance"

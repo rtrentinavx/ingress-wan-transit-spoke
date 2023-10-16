@@ -65,7 +65,7 @@ resource "azurerm_virtual_machine" "activefgtvm" {
   count                        = var.custom ? 0 : 1
   name                         = "activefgt"
   location                     = var.location
-  resource_group_name          = azurerm_resource_group.myterraformgroup.name
+  resource_group_name          = azurerm_resource_group.terraform-azure-resource-group.name
   network_interface_ids        = [azurerm_network_interface.activeport1.id, azurerm_network_interface.activeport2.id, azurerm_network_interface.activeport3.id]
   primary_network_interface_id = azurerm_network_interface.activeport1.id
   vm_size                      = var.size
@@ -141,7 +141,7 @@ data "template_file" "activeFortiGate" {
     clientid        = var.client_id
     clientsecret    = var.client_secret
     adminsport      = var.adminsport
-    rsg             = azurerm_resource_group.myterraformgroup.name
+    rsg             = azurerm_resource_group.terraform-azure-resource-group.name
     clusterip       = azurerm_public_ip.ClusterPublicIP.name
     routename       = azurerm_route_table.internal.name
   }

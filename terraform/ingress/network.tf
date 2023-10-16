@@ -71,7 +71,7 @@ resource "azurerm_network_security_rule" "outgoing_mgmt" {
   destination_port_range      = "*"
   source_address_prefix       = "*"
   destination_address_prefix  = "*"
-  resource_group_name = azurerm_resource_group.resouce_group_ingress_vnet.name
+  resource_group_name         = azurerm_resource_group.resouce_group_ingress_vnet.name
   network_security_group_name = azurerm_network_security_group.mgmtnetworknsg.name
 }
 
@@ -86,7 +86,7 @@ resource "azurerm_network_security_rule" "outgoing_public" {
   destination_port_range      = "*"
   source_address_prefix       = "*"
   destination_address_prefix  = "*"
-  resource_group_name = azurerm_resource_group.resouce_group_ingress_vnet.name
+  resource_group_name         = azurerm_resource_group.resouce_group_ingress_vnet.name
   network_security_group_name = azurerm_network_security_group.publicnetworknsg.name
 }
 
@@ -100,7 +100,7 @@ resource "azurerm_network_security_rule" "outgoing_private" {
   destination_port_range      = "*"
   source_address_prefix       = "*"
   destination_address_prefix  = "*"
-  resource_group_name = azurerm_resource_group.resouce_group_ingress_vnet.name
+  resource_group_name         = azurerm_resource_group.resouce_group_ingress_vnet.name
   network_security_group_name = azurerm_network_security_group.privatenetworknsg.name
 }
 

@@ -2,7 +2,7 @@ resource "azurerm_virtual_machine" "fgtvm" {
   name                         = "fgtvm"
   location                     = azurerm_resource_group.resouce_group_ingress_vnet.location
   resource_group_name          = azurerm_resource_group.resouce_group_ingress_vnet.name
-  network_interface_ids        = [azurerm_network_interface.fgtport1.id, azurerm_network_interface.fgtport2.id,  azurerm_network_interface.fgtport3.id]
+  network_interface_ids        = [azurerm_network_interface.fgtport1.id, azurerm_network_interface.fgtport2.id, azurerm_network_interface.fgtport3.id]
   primary_network_interface_id = azurerm_network_interface.fgtport1.id
   vm_size                      = var.size
   storage_image_reference {

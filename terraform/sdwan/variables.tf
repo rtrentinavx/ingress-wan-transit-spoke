@@ -4,18 +4,18 @@ variable "virtual_network_name" { type = string }
 variable "address_space" { type = list(string) }
 variable "subnet" {
   type = map(object({
-    name                        = string
-    address_prefixes                      = list(string)
+    name             = string
+    address_prefixes = list(string)
   }))
 }
 variable "tags" {
   type = map(string)
 }
 
-variable subscription_id { type = string }
-variable  client_id      { type = string }
-variable  client_secret   { type = string }
-variable tenant_id      { type = string }
+variable "subscription_id" { type = string }
+variable "client_id" { type = string }
+variable "client_secret" { type = string }
+variable "tenant_id" { type = string }
 
 //  For HA, choose instance size that support 4 nics at least
 //  Check : https://docs.microsoft.com/en-us/azure/virtual-machines/linux/sizes
@@ -113,97 +113,77 @@ variable "adminsport" {
   default = "8443"
 }
 
-variable "vnetcidr" {
-  default = "172.1.0.0/16"
-}
-
-variable "publiccidr" {
-  default = "172.1.0.0/24"
-}
-
-variable "privatecidr" {
-  default = "172.1.1.0/24"
-}
-
-variable "hasynccidr" {
-  default = "172.1.2.0/24"
-}
-
-variable "hamgmtcidr" {
-  default = "172.1.3.0/24"
-}
-
 variable "activeport1" {
-  default = "172.1.3.10"
+  type = string
 }
 
 variable "activeport1mask" {
-  default = "255.255.255.0"
-}
+  type = string
+  }
 
 variable "activeport2" {
-  default = "172.1.0.10"
-}
+  type = string
+  }
 
 variable "activeport2mask" {
-  default = "255.255.255.0"
-}
+  type = string
+  }
 
 variable "activeport3" {
-  default = "172.1.1.10"
-}
+  type = string
+  }
 
 variable "activeport3mask" {
-  default = "255.255.255.0"
-}
+  type = string
+  }
 
 variable "activeport4" {
-  default = "172.1.2.10"
-}
+  type = string
+  }
 
 variable "activeport4mask" {
-  default = "255.255.255.0"
-}
+  type = string
+  }
 
 variable "passiveport1" {
-  default = "172.1.3.11"
-}
+  type = string
+  }
 
 variable "passiveport1mask" {
-  default = "255.255.255.0"
-}
+  type = string
+  }
 
 variable "passiveport2" {
-  default = "172.1.0.11"
-}
+  type = string
+  }
 
 variable "passiveport2mask" {
-  default = "255.255.255.0"
-}
+  type = string
+  }
 
 variable "passiveport3" {
-  default = "172.1.1.11"
-}
+  type = string
+  }
 
 variable "passiveport3mask" {
-  default = "255.255.255.0"
-}
+  type = string
+  }
 
 variable "passiveport4" {
-  default = "172.1.2.11"
-}
+  type = string
+  }
 
 variable "passiveport4mask" {
-  default = "255.255.255.0"
-}
+  type = string
+  }
 
 variable "port1gateway" {
-  default = "172.1.3.1"
-}
+  type = string
+  }
 
 variable "port2gateway" {
-  default = "172.1.0.1"
-}
+  type = string
+  }
 
 variable "bootstrap-active" {
   // Change to your own path

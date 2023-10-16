@@ -1,20 +1,21 @@
 terraform {
-  required_version = ">= 1.2.9"
   required_providers {
     azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "3.75.0"
+      source = "hashicorp/azurerm"
     }
   }
-    backend "azurerm" {
-    resource_group_name  = ""
-    storage_account_name = ""
-    container_name       = ""
-    key                  = ""
-    use_azuread_auth     = true
+  backend "azurerm" {
+    resource_group_name  = "syneos-backend-storage-rg"
+    storage_account_name = "storagesyneostfstate"
+    container_name       = "state"
+    key                  = "terraform.tfstate.asr"
   }
 }
 
 provider "azurerm" {
+  subscription_id         = var.subscription_id
+  client_id               = var.client_id
+  client_secret_file_path = var.client_secret_file_path
+  tenant_id               = var.tenant_id
   features {}
 }

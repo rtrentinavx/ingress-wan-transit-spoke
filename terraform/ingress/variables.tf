@@ -26,10 +26,10 @@ variable "vnet_name" {
 }
 
 // Azure configuration
-variable subscription_id {}
-variable client_id {}
-variable client_secret {}
-variable tenant_id {}
+variable "subscription_id" {}
+variable "client_id" {}
+variable "client_secret" {}
+variable "tenant_id" {}
 
 variable "size" {
   type    = string
@@ -77,7 +77,7 @@ variable "fgtoffer" {
 // BYOL sku: fortinet_fg-vm
 // PAYG sku: fortinet_fg-vm_payg_20190624
 variable "fgtsku" {
-  type = map
+  type = map(any)
   default = {
     byol = "fortinet_fg-vm"
     payg = "fortinet_fg-vm_payg_2022"
