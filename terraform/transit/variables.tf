@@ -3,6 +3,11 @@ variable "client_id" { type = string }
 variable "client_secret_file_path" { type = string }
 variable "tenant_id" { type = string }
 variable "location" { type = string }
+
+variable "resource_group_name" { type = string }
+variable "storage_account_name" { type = string }
+variable "container_name" { type = string }
+variable "key" { type = string }
 variable "resource_group" { type = string }
 variable "virtual_network_name" { type = string }
 variable "address_space" { type = string }

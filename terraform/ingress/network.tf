@@ -1,8 +1,7 @@
-//  Network Security Group
 resource "azurerm_network_security_group" "mgmtnetworknsg" {
   name                = "MgmtNetworkSecurityGroup"
-  location            = azurerm_resource_group.resouce_group_ingress_vnet.location
-  resource_group_name = azurerm_resource_group.resouce_group_ingress_vnet.name
+  location            = azurerm_resource_group.resource_group.location
+  resource_group_name = azurerm_resource_group.resource_group.name
 
   security_rule {
     name                       = "TCP"
@@ -19,8 +18,8 @@ resource "azurerm_network_security_group" "mgmtnetworknsg" {
 
 resource "azurerm_network_security_group" "publicnetworknsg" {
   name                = "PublicNetworkSecurityGroup"
-  location            = azurerm_resource_group.resouce_group_ingress_vnet.location
-  resource_group_name = azurerm_resource_group.resouce_group_ingress_vnet.name
+  location            = azurerm_resource_group.resource_group.location
+  resource_group_name = azurerm_resource_group.resource_group.name
 
   security_rule {
     name                       = "TCP"
@@ -33,16 +32,13 @@ resource "azurerm_network_security_group" "publicnetworknsg" {
     source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
-
-  tags = {
-    environment = "Terraform Demo"
-  }
+  tags = var.tags
 }
 
 resource "azurerm_network_security_group" "privatenetworknsg" {
   name                = "PrivateNetworkSecurityGroup"
-  location            = azurerm_resource_group.resouce_group_ingress_vnet.location
-  resource_group_name = azurerm_resource_group.resouce_group_ingress_vnet.name
+  location            = azurerm_resource_group.resource_group.location
+  resource_group_name = azurerm_resource_group.resource_group.name
 
   security_rule {
     name                       = "All"
@@ -55,10 +51,7 @@ resource "azurerm_network_security_group" "privatenetworknsg" {
     source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
-
-  tags = {
-    environment = "Terraform Demo"
-  }
+  tags = var.tags
 }
 
 resource "azurerm_network_security_rule" "outgoing_mgmt" {
@@ -71,10 +64,9 @@ resource "azurerm_network_security_rule" "outgoing_mgmt" {
   destination_port_range      = "*"
   source_address_prefix       = "*"
   destination_address_prefix  = "*"
-  resource_group_name         = azurerm_resource_group.resouce_group_ingress_vnet.name
+  resource_group_name         = azurerm_resource_group.resource_group.name
   network_security_group_name = azurerm_network_security_group.mgmtnetworknsg.name
 }
-
 
 resource "azurerm_network_security_rule" "outgoing_public" {
   name                        = "egress"
@@ -86,7 +78,7 @@ resource "azurerm_network_security_rule" "outgoing_public" {
   destination_port_range      = "*"
   source_address_prefix       = "*"
   destination_address_prefix  = "*"
-  resource_group_name         = azurerm_resource_group.resouce_group_ingress_vnet.name
+  resource_group_name         = azurerm_resource_group.resource_group.name
   network_security_group_name = azurerm_network_security_group.publicnetworknsg.name
 }
 
@@ -100,15 +92,14 @@ resource "azurerm_network_security_rule" "outgoing_private" {
   destination_port_range      = "*"
   source_address_prefix       = "*"
   destination_address_prefix  = "*"
-  resource_group_name         = azurerm_resource_group.resouce_group_ingress_vnet.name
+  resource_group_name         = azurerm_resource_group.resource_group.name
   network_security_group_name = azurerm_network_security_group.privatenetworknsg.name
 }
 
-// FGT Network Interface port1
 resource "azurerm_network_interface" "fgtport1" {
   name                = "fgtport1"
-  location            = azurerm_resource_group.resouce_group_ingress_vnet.location
-  resource_group_name = azurerm_resource_group.resouce_group_ingress_vnet.name
+  location            = azurerm_resource_group.resource_group.location
+  resource_group_name = azurerm_resource_group.resource_group.name
 
   ip_configuration {
     name                          = "ipconfig1"
@@ -117,16 +108,13 @@ resource "azurerm_network_interface" "fgtport1" {
     primary                       = true
     public_ip_address_id          = azurerm_public_ip.FGTPublicIp.id
   }
-
-  tags = {
-    environment = "Terraform Demo"
-  }
+  tags = var.tags
 }
 
 resource "azurerm_network_interface" "fgtport2" {
   name                 = "fgtport2"
-  location             = azurerm_resource_group.resouce_group_ingress_vnet.location
-  resource_group_name  = azurerm_resource_group.resouce_group_ingress_vnet.name
+  location             = azurerm_resource_group.resource_group.location
+  resource_group_name  = azurerm_resource_group.resource_group.name
   enable_ip_forwarding = true
 
   ip_configuration {
@@ -134,16 +122,13 @@ resource "azurerm_network_interface" "fgtport2" {
     subnet_id                     = module.vnet.vnet_subnets_name_id[1]
     private_ip_address_allocation = "Dynamic"
   }
-
-  tags = {
-    environment = "Terraform Demo"
-  }
+  tags = var.tags
 }
 
 resource "azurerm_network_interface" "fgtport3" {
   name                 = "fgtport3"
-  location             = azurerm_resource_group.resouce_group_ingress_vnet.location
-  resource_group_name  = azurerm_resource_group.resouce_group_ingress_vnet.name
+  location             = azurerm_resource_group.resource_group.location
+  resource_group_name  = azurerm_resource_group.resource_group.name
   enable_ip_forwarding = true
 
   ip_configuration {
@@ -151,13 +136,9 @@ resource "azurerm_network_interface" "fgtport3" {
     subnet_id                     = module.vnet.vnet_subnets_name_id[2]
     private_ip_address_allocation = "Dynamic"
   }
-
-  tags = {
-    environment = "Terraform Demo"
-  }
+  tags = var.tags
 }
 
-# Connect the security group to the network interfaces
 resource "azurerm_network_interface_security_group_association" "port1nsg" {
   depends_on                = [azurerm_network_interface.fgtport1]
   network_interface_id      = azurerm_network_interface.fgtport1.id

@@ -1,15 +1,15 @@
 resource "azurerm_virtual_machine" "fgtvm" {
-  name                         = "fgtvm"
-  location                     = azurerm_resource_group.resouce_group_ingress_vnet.location
-  resource_group_name          = azurerm_resource_group.resouce_group_ingress_vnet.name
+  name                         = var.firewall_name
+  location                     = azurerm_resource_group.resource_group.location
+  resource_group_name          = azurerm_resource_group.resource_group.name
   network_interface_ids        = [azurerm_network_interface.fgtport1.id, azurerm_network_interface.fgtport2.id, azurerm_network_interface.fgtport3.id]
   primary_network_interface_id = azurerm_network_interface.fgtport1.id
-  vm_size                      = var.size
+  vm_size                      = var.firewall_size
   storage_image_reference {
     publisher = var.publisher
     offer     = var.fgtoffer
     sku       = var.license_type == "byol" ? var.fgtsku["byol"] : var.fgtsku["payg"]
-    version   = var.fgtversion
+    version   = var.firewall_image_version
   }
 
   plan {
@@ -35,9 +35,9 @@ resource "azurerm_virtual_machine" "fgtvm" {
   }
 
   os_profile {
-    computer_name  = "fgtvm"
-    admin_username = var.adminusername
-    admin_password = var.adminpassword
+    computer_name  = var.firewall_name
+    admin_username = data.azurerm_key_vault_secret.secret-firewall-username.value
+    admin_password = data.azurerm_key_vault_secret.secret-firewall-password.value
     custom_data    = data.template_file.fgtvm.rendered
   }
 
@@ -49,10 +49,7 @@ resource "azurerm_virtual_machine" "fgtvm" {
     enabled     = true
     storage_uri = azurerm_storage_account.fgtstorageaccount.primary_blob_endpoint
   }
-
-  tags = {
-    environment = "Terraform Demo"
-  }
+  tags = var.tags
 }
 
 data "template_file" "fgtvm" {

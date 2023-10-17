@@ -1,68 +1,23 @@
-variable "subscription_id" {
-  type = string
-}
-
-variable "resouce_group_ingress_vnet" {
-  type = string
-}
-variable "location" {
-  type    = string
-  default = "East US"
-}
-
-variable "address_space" {
-  type = string
-}
-
-variable "subnet_names" {
-
-}
-variable "subnet_prefixes" {
-  type = list(string)
-}
-
-variable "vnet_name" {
-  type = string
-}
-
-// Azure configuration
-variable "subscription_id" {}
-variable "client_id" {}
-variable "client_secret" {}
-variable "tenant_id" {}
-
-variable "size" {
-  type    = string
-  default = "Standard_F4"
-}
-
-// To use custom image
-// by default is false
-variable "custom" {
-  default = false
-}
-
-//  Custom image blob uri
-variable "customuri" {
-  type    = string
-  default = "<custom image blob uri>"
-}
-
-variable "custom_image_name" {
-  type    = string
-  default = "<custom image name>"
-}
-
-variable "custom_image_resource_group_name" {
-  type    = string
-  default = "<custom image resource group>"
-}
-
-// License Type to create FortiGate-VM
-// Provide the license type for FortiGate-VM Instances, either byol or payg.
-variable "license_type" {
-  default = "payg"
-}
+variable "subscription_id" { type = string }
+variable "client_id" { type = string }
+variable "client_secret_file_path" { type = string }
+variable "tenant_id" { type = string }
+variable "location" { type = string }
+variable "resource_group" { type = string }
+variable "virtual_network_name" { type = string }
+variable "address_space" { type = string }
+variable "rg-keyvault" { type = string }
+variable "keyvault_name" { type = string }
+variable "gw_name" { type = string }
+variable "transit_gateway_name" { type = string }
+variable "enable_max_performance" { type = bool }
+variable "insane_mode" { type = bool }
+variable "instance_size" { type = string }
+variable "inspection" { type = bool }
+variable "tags" { type = map(string) }
+variable "firewall_name" { type = string }
+variable "firewall_size" { type = string }
+variable "license_type" { default = "byol" }
 
 variable "publisher" {
   type    = string
@@ -74,8 +29,6 @@ variable "fgtoffer" {
   default = "fortinet_fortigate-vm_v5"
 }
 
-// BYOL sku: fortinet_fg-vm
-// PAYG sku: fortinet_fg-vm_payg_20190624
 variable "fgtsku" {
   type = map(any)
   default = {
@@ -84,25 +37,7 @@ variable "fgtsku" {
   }
 }
 
-variable "fgtversion" {
-  type    = string
-  default = "7.0.12"
-}
-
-variable "adminusername" {
-  type    = string
-  default = "azureadmin"
-}
-
-variable "adminpassword" {
-  type    = string
-  default = "Fortinet123#"
-}
-
-variable "location" {
-  type    = string
-  default = "westus2"
-}
+variable "firewall_image_version" { type    = string }
 
 variable "vnetcidr" {
   default = "10.1.0.0/16"

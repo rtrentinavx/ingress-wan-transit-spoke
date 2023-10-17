@@ -1,30 +1,30 @@
 
 resource "azurerm_resource_group" "terraform-azure-resource-group" {
-    name = var.resource_group
-    location = var.location
-    tags = {}
-    }
+  name     = var.resource_group
+  location = var.location
+  tags     = {}
+}
 
 resource "azurerm_virtual_network" "terraform-azure-virtual_network" {
   depends_on = [
     azurerm_resource_group.terraform-azure-resource-group
   ]
-  name = var.virtual_network_name
+  name                = var.virtual_network_name
   resource_group_name = azurerm_resource_group.terraform-azure-resource-group.name
-  address_space = var.address_space
-  location = azurerm_resource_group.terraform-azure-resource-group.location
-  tags = {}
+  address_space       = var.address_space
+  location            = azurerm_resource_group.terraform-azure-resource-group.location
+  tags                = {}
 }
 
 resource "azurem_subnet" "terraform-azure-subnet" {
   depends_on = [
     azurerm_virtual_network.terraform-azure-virtual_network
   ]
-  for_each = var.subnet
-  resource_group_name = azurerm_resource_group.terraform-azure-resource-group.name
+  for_each             = var.subnet
+  resource_group_name  = azurerm_resource_group.terraform-azure-resource-group.name
   virtual_network_name = azurerm_virtual_network.terraform-azure-virtual_network.name
-  name = each.value.name
-  address_prefixes = each.value.address_prefixes
+  name                 = each.value.name
+  address_prefixes     = each.value.address_prefixes
 }
 
 resource "azurerm_route_table" "route_table" {
@@ -62,17 +62,17 @@ module "mc-spoke" {
   depends_on = [
     azurerm_subnet_route_table_association.subnet_route_table_association
   ]
-  cloud         = "Azure"
-  name = var.vpc_name
-  gw_name = var.gw_name
-  gw_subnet = azurerm_subnet.terraform-azure-subnet.address_prefixes["subnet01"]
-  hagw_subnet = azurerm_subnet.terraform-azure-subnet.address_prefixes["subnet02"]
-  region = module.regions.location
-  cidr = var.address_space
-  account = data.azurerm_subscription.current.display_name
-  resource_group = azurerm_resource_group.terraform-azure-resource-group.name
-  transit_gw = var.transit_gateway_name
+  cloud            = "Azure"
+  name             = var.vpc_name
+  gw_name          = var.gw_name
+  gw_subnet        = azurerm_subnet.terraform-azure-subnet.address_prefixes["subnet01"]
+  hagw_subnet      = azurerm_subnet.terraform-azure-subnet.address_prefixes["subnet02"]
+  region           = module.regions.location
+  cidr             = var.address_space
+  account          = data.azurerm_subscription.current.display_name
+  resource_group   = azurerm_resource_group.terraform-azure-resource-group.name
+  transit_gw       = var.transit_gateway_name
   use_existing_vpc = true
-  inspection = true
-  vpc_id         = "${azurerm_virtual_network.terraform-azure-virtual_network.name}:${azurerm_resource_group.terraform-azure-resource-group.name}:${azurem_virtual_network.terraform-azure-virtual_network.guid}"
+  inspection       = true
+  vpc_id           = "${azurerm_virtual_network.terraform-azure-virtual_network.name}:${azurerm_resource_group.terraform-azure-resource-group.name}:${azurem_virtual_network.terraform-azure-virtual_network.guid}"
 }
