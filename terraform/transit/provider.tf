@@ -16,7 +16,6 @@ terraform {
     key                  = var.key
   }
 }
-
 provider "aviatrix" {
   controller_ip           = data.azurerm_key_vault_secret.secret-avx-controller-public-ip.value
   username                = data.azurerm_key_vault_secret.secret-avx-username.value
@@ -24,7 +23,6 @@ provider "aviatrix" {
   skip_version_validation = true
   verify_ssl_certificate  = false
 }
-
 provider "azurerm" {
   subscription_id         = var.subscription_id
   client_id               = var.client_id

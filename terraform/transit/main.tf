@@ -3,7 +3,6 @@ module "regions" {
   version      = "7.0.0"
   azure_region = data.azurerm_resource_group.resource-group.location
 }
-
 module "mc-transit" {
   source                        = "terraform-aviatrix-modules/mc-transit/aviatrix"
   version                       = "2.5.1"
@@ -23,7 +22,6 @@ module "mc-transit" {
   resource_group                = data.azurerm_resource_group.resource-group.name
   tags                          = var.tags
 }
-
 module "mc-firenet" {
   source                 = "terraform-aviatrix-modules/mc-firenet/aviatrix"
   version                = "1.5.2"
@@ -37,5 +35,3 @@ module "mc-firenet" {
   transit_module         = module.mc-transit
   tags                   = var.tags
 }
-
-
