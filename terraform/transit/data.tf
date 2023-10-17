@@ -36,4 +36,7 @@ data "azurerm_key_vault_secret" "secret-firewall-password" {
   key_vault_id = data.azurerm_key_vault.keyvault.id
 }
 
+data azurerm_resource_group "resource-group" {
+    name = var.resource_group
+}
 

@@ -1,10 +1,3 @@
-
-resource "azurerm_resource_group" "resource-group" {
-  name     = var.resource_group
-  location = var.location
-  tags     = var.tags
-}
-
 module "regions" {
   source       = "claranet/regions/azurerm"
   version      = "7.0.0"
@@ -27,7 +20,7 @@ module "mc-transit" {
   gw_name                       = var.gw_name
   name                          = var.virtual_network_name
   region                        = module.regions.location
-  resource_group                = azurerm_resource_group.resource-group.name
+  resource_group                = data.azurerm_resource_group.resource-group.name
   tags                          = var.tags
 }
 
