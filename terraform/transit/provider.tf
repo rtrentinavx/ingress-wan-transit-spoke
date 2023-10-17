@@ -10,10 +10,11 @@ terraform {
     }
   }
   backend "azurerm" {
-    resource_group_name  = var.resource_group_name
-    storage_account_name = var.storage_account_name
-    container_name       = var.container_name
-    key                  = var.key
+    resource_group_name  = "syneos-backend-storage-rg"
+    storage_account_name = "storagesyneostfstate"
+    container_name       = "state"
+    key                  = "terraform.tfstate.transit"
+    subscription_id      = "47ab116c-8c15-4453-b06a-3fecd09ebda9"
   }
 }
 provider "aviatrix" {
@@ -23,6 +24,15 @@ provider "aviatrix" {
   skip_version_validation = true
   verify_ssl_certificate  = false
 }
+provider "azurerm" {
+  alias                   = "keyvault"
+  subscription_id         = var.keyvault_subscription_id
+  client_id               = var.keyvault_client_id
+  client_secret_file_path = var.keyvault_client_secret_file_path
+  tenant_id               = var.keyvault_tenant_id
+  features {}
+}
+
 provider "azurerm" {
   subscription_id         = var.subscription_id
   client_id               = var.client_id
