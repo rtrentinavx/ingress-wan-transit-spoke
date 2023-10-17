@@ -1,7 +1,7 @@
 module "regions" {
   source       = "claranet/regions/azurerm"
   version      = "7.0.0"
-  azure_region = azurerm_resource_group.resource-group.location
+  azure_region = data.azurerm_resource_group.resource-group.location
 }
 
 module "mc-transit" {
