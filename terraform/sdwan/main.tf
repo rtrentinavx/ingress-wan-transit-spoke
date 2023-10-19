@@ -29,7 +29,7 @@ resource "azurerm_route" "default" {
 
 resource "azurerm_subnet_route_table_association" "internalassociate" {
   depends_on     = [azurerm_route_table.internal]
-  subnet_id      = module.vnet.vnet_subnets_name_id[privanetsubnet]
+  subnet_id      = module.vnet.vnet_subnets_name_id["privanetsubnet"]
   route_table_id = azurerm_route_table.internal.id
 }
 
@@ -134,7 +134,7 @@ resource "azurerm_network_interface" "activeport1" {
 
   ip_configuration {
     name                          = "ipconfig1"
-    subnet_id                     = module.vnet.vnet_subnets_name_id[hamgmtsubnet]
+    subnet_id                     = module.vnet.vnet_subnets_name_id["hamgmtsubnet"]
     private_ip_address_allocation = "Static"
     private_ip_address            = var.activeport1
     primary                       = true
@@ -152,7 +152,7 @@ resource "azurerm_network_interface" "activeport2" {
 
   ip_configuration {
     name                          = "ipconfig1"
-    subnet_id                     = module.vnet.vnet_subnets_name_id[publicsubnet]
+    subnet_id                     = module.vnet.vnet_subnets_name_id["publicsubnet"]
     private_ip_address_allocation = "Static"
     private_ip_address            = var.activeport2
     public_ip_address_id          = azurerm_public_ip.ClusterPublicIP.id

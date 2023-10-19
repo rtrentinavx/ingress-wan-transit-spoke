@@ -12,7 +12,7 @@ terraform {
     resource_group_name  = "syneos-backend-storage-rg"
     storage_account_name = "storagesyneostfstate"
     container_name       = "state"
-    key                  = "terraform.tfstate.asr"
+    key                  = "terraform.tfstate.sdwan"
   }
 }
 
