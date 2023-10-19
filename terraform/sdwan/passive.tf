@@ -42,23 +42,7 @@ resource "azurerm_virtual_machine" "passivefgtvm" {
     computer_name  = var.firewall_name[0]
     admin_username = data.azurerm_key_vault_secret.secret-firewall-username.value
     admin_password = data.azurerm_key_vault_secret.secret-firewall-password.value
-    custom_data    = data.template_file.passiveFortiGate.rendered
-  }
-
-  os_profile_linux_config {
-    disable_password_authentication = false
-  }
-
-  boot_diagnostics {
-    enabled     = true
-    storage_uri = azurerm_storage_account.fgtstorageaccount.primary_blob_endpoint
-  }
-  tags = var.tags
-}
-
-data "templatefile" "passiveFortiGate" {
-  template = file(var.bootstrap-passive)
-  vars = {
+    custom_data    = templatefile("${path.module}/config-passive.conf", {
     type            = var.license_type
     license_file    = var.license2
     port1_ip        = var.passiveport1
@@ -78,5 +62,16 @@ data "templatefile" "passiveFortiGate" {
     rsg             = data.azurerm_resource_group.resource-group.name
     clusterip       = azurerm_public_ip.ClusterPublicIP.name
     routename       = azurerm_route_table.internal.name
+  })
   }
+  
+  os_profile_linux_config {
+    disable_password_authentication = false
+  }
+
+  boot_diagnostics {
+    enabled     = true
+    storage_uri = azurerm_storage_account.fgtstorageaccount.primary_blob_endpoint
+  }
+  tags = var.tags
 }

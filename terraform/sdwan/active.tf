@@ -41,23 +41,7 @@ resource "azurerm_virtual_machine" "activefgtvm" {
     computer_name  = var.firewall_name[0]
     admin_username = data.azurerm_key_vault_secret.secret-firewall-username.value
     admin_password = data.azurerm_key_vault_secret.secret-firewall-password.value
-    custom_data    = data.template_file.activeFortiGate.rendered
-  }
-
-  os_profile_linux_config {
-    disable_password_authentication = false
-  }
-
-  boot_diagnostics {
-    enabled     = true
-    storage_uri = azurerm_storage_account.fgtstorageaccount.primary_blob_endpoint
-  }
-  tags = var.tags
-}
-
-data "templatefile" "activeFortiGate" {
-  template = file(var.bootstrap-active)
-  vars = {
+    custom_data    = templatefile("${path.module}/config-active.conf", {
     type         = var.license_type
     license_file = var.license
     port1_ip     = var.activeport1
@@ -77,5 +61,17 @@ data "templatefile" "activeFortiGate" {
     rsg             = data.azurerm_resource_group.resource-group.name
     clusterip       = azurerm_public_ip.ClusterPublicIP.name
     routename       = azurerm_route_table.internal.name
+  } )
+    }
+
+  os_profile_linux_config {
+    disable_password_authentication = false
   }
+
+  boot_diagnostics {
+    enabled     = true
+    storage_uri = azurerm_storage_account.fgtstorageaccount.primary_blob_endpoint
+  }
+  tags = var.tags
 }
+
