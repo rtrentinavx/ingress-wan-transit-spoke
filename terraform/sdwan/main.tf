@@ -29,7 +29,7 @@ resource "azurerm_route" "default" {
 
 resource "azurerm_subnet_route_table_association" "internalassociate" {
   depends_on     = [azurerm_route_table.internal]
-  subnet_id      = module.vnet.vnet_subnets_name_id[2]
+  subnet_id      = module.vnet.vnet_subnets_name_id[privanetsubnet]
   route_table_id = azurerm_route_table.internal.id
 }
 
@@ -134,7 +134,7 @@ resource "azurerm_network_interface" "activeport1" {
 
   ip_configuration {
     name                          = "ipconfig1"
-    subnet_id                     = module.vnet.vnet_subnets_name_id[0]
+    subnet_id                     = module.vnet.vnet_subnets_name_id[hamgmtsubnet]
     private_ip_address_allocation = "Static"
     private_ip_address            = var.activeport1
     primary                       = true
@@ -152,15 +152,12 @@ resource "azurerm_network_interface" "activeport2" {
 
   ip_configuration {
     name                          = "ipconfig1"
-    subnet_id                     = module.vnet.vnet_subnets_name_id[1]
+    subnet_id                     = module.vnet.vnet_subnets_name_id[publicsubnet]
     private_ip_address_allocation = "Static"
     private_ip_address            = var.activeport2
     public_ip_address_id          = azurerm_public_ip.ClusterPublicIP.id
   }
-
-  tags = {
-    environment = "Terraform Demo"
-  }
+  tags = var.tags
 }
 
 resource "azurerm_network_interface" "activeport3" {
@@ -176,7 +173,6 @@ resource "azurerm_network_interface" "activeport3" {
     private_ip_address_allocation = "Static"
     private_ip_address            = var.activeport3
   }
-
   tags = var.tags
 }
 
@@ -206,7 +202,7 @@ resource "azurerm_network_interface" "passiveport1" {
 
   ip_configuration {
     name                          = "ipconfig1"
-    subnet_id                     = module.vnet.vnet_subnets_name_id[0]
+    subnet_id                     = module.vnet.vnet_subnets_name_id["hamgmtsubnet"]
     private_ip_address_allocation = "Static"
     private_ip_address            = var.passiveport1
     primary                       = true
@@ -224,7 +220,7 @@ resource "azurerm_network_interface" "passiveport2" {
 
   ip_configuration {
     name                          = "ipconfig1"
-    subnet_id                     = module.vnet.vnet_subnets_name_id[1]
+    subnet_id                     = module.vnet.vnet_subnets_name_id["publicsubnet"]
     private_ip_address_allocation = "Static"
     private_ip_address            = var.passiveport2
   }
@@ -240,7 +236,7 @@ resource "azurerm_network_interface" "passiveport3" {
 
   ip_configuration {
     name                          = "ipconfig1"
-    subnet_id                     = module.vnet.vnet_subnets_name_id[2]
+    subnet_id                     = module.vnet.vnet_subnets_name_id["privatesubnet"]
     private_ip_address_allocation = "Static"
     private_ip_address            = var.passiveport3
   }
