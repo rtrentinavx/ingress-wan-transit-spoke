@@ -1,70 +1,19 @@
-resource "azurerm_virtual_machine" "custompassivefgtvm" {
-  depends_on                   = [azurerm_virtual_machine.customactivefgtvm]
-  count                        = var.custom ? 1 : 0
-  name                         = "custompassivefgt"
-  location                     = var.location
-  resource_group_name          = azurerm_resource_group.terraform-azure-resource-group.name
-  network_interface_ids        = [azurerm_network_interface.passiveport1.id, azurerm_network_interface.passiveport2.id, azurerm_network_interface.passiveport3.id]
-  primary_network_interface_id = azurerm_network_interface.passiveport1.id
-  vm_size                      = var.size
-  zones                        = [var.zone2]
-
-  storage_image_reference {
-    id = var.custom ? element(azurerm_image.custom.*.id, 0) : null
-  }
-
-  storage_os_disk {
-    name              = "passiveosDisk"
-    caching           = "ReadWrite"
-    managed_disk_type = "Standard_LRS"
-    create_option     = "FromImage"
-  }
-
-  # Log data disks
-  storage_data_disk {
-    name              = "passivedatadisk"
-    managed_disk_type = "Standard_LRS"
-    create_option     = "Empty"
-    lun               = 0
-    disk_size_gb      = "30"
-  }
-
-  os_profile {
-    computer_name  = "custompassivefgt"
-    admin_username = var.adminusername
-    admin_password = var.adminpassword
-    custom_data    = data.template_file.passiveFortiGate.rendered
-  }
-
-  os_profile_linux_config {
-    disable_password_authentication = false
-  }
-
-  boot_diagnostics {
-    enabled     = true
-    storage_uri = azurerm_storage_account.fgtstorageaccount.primary_blob_endpoint
-  }
-  tags = var.tags
-}
-
-
 resource "azurerm_virtual_machine" "passivefgtvm" {
   depends_on                   = [azurerm_virtual_machine.activefgtvm]
-  count                        = var.custom ? 0 : 1
-  name                         = "passivefgt"
+  name                         = var.firewall_name[1]
   location                     = var.location
-  resource_group_name          = azurerm_resource_group.terraform-azure-resource-group.name
+  resource_group_name          = data.azurerm_resource_group.resource-group.name
   network_interface_ids        = [azurerm_network_interface.passiveport1.id, azurerm_network_interface.passiveport2.id, azurerm_network_interface.passiveport3.id]
   primary_network_interface_id = azurerm_network_interface.passiveport1.id
-  vm_size                      = var.size
+  vm_size                      = var.fw_instance_size
   zones                        = [var.zone2]
 
   storage_image_reference {
-    publisher = var.custom ? null : var.publisher
-    offer     = var.custom ? null : var.fgtoffer
+    publisher =  var.publisher
+    offer     =  var.fgtoffer
     sku       = var.license_type == "byol" ? var.fgtsku["byol"] : var.fgtsku["payg"]
-    version   = var.custom ? null : var.fgtversion
-    id        = var.custom ? element(azurerm_image.custom.*.id, 0) : null
+    version   = var.firewall_image_version
+    id        = null
   }
 
   plan {
@@ -74,7 +23,7 @@ resource "azurerm_virtual_machine" "passivefgtvm" {
   }
 
   storage_os_disk {
-    name              = "passiveosDisk"
+    name              = "${var.firewall_name[1]}passiveosDisk"
     caching           = "ReadWrite"
     managed_disk_type = "Standard_LRS"
     create_option     = "FromImage"
@@ -82,7 +31,7 @@ resource "azurerm_virtual_machine" "passivefgtvm" {
 
   # Log data disks
   storage_data_disk {
-    name              = "passivedatadisk"
+    name              = "${var.firewall_name[1]}passivedatadisk"
     managed_disk_type = "Standard_LRS"
     create_option     = "Empty"
     lun               = 0
@@ -90,9 +39,9 @@ resource "azurerm_virtual_machine" "passivefgtvm" {
   }
 
   os_profile {
-    computer_name  = "passivefgt"
-    admin_username = var.adminusername
-    admin_password = var.adminpassword
+    computer_name  = var.firewall_name[0]
+    admin_username = data.azurerm_key_vault_secret.secret-firewall-username.value
+    admin_password = data.azurerm_key_vault_secret.secret-firewall-password.value
     custom_data    = data.template_file.passiveFortiGate.rendered
   }
 
@@ -107,9 +56,8 @@ resource "azurerm_virtual_machine" "passivefgtvm" {
   tags = var.tags
 }
 
-data "template_file" "passiveFortiGate" {
+data "templatefile" "passiveFortiGate" {
   template = file(var.bootstrap-passive)
-
   vars = {
     type            = var.license_type
     license_file    = var.license2
@@ -127,7 +75,7 @@ data "template_file" "passiveFortiGate" {
     clientid        = var.client_id
     clientsecret    = var.client_secret
     adminsport      = var.adminsport
-    rsg             = azurerm_resource_group.terraform-azure-resource-group.name
+    rsg             = data.azurerm_resource_group.resource-group.name
     clusterip       = azurerm_public_ip.ClusterPublicIP.name
     routename       = azurerm_route_table.internal.name
   }
