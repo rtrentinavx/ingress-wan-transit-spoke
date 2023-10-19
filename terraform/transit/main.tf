@@ -7,7 +7,7 @@ module "mc-transit" {
   source                        = "terraform-aviatrix-modules/mc-transit/aviatrix"
   version                       = "2.5.1"
   account                       = data.azurerm_subscription.current.display_name
-  bgp_ecmp                      = true
+  bgp_ecmp                      = false
   bgp_lan_interfaces_count      = 2
   cloud                         = "Azure"
   cidr                          = var.address_space
@@ -16,6 +16,7 @@ module "mc-transit" {
   enable_egress_transit_firenet = true
   enable_transit_firenet        = true
   insane_mode                   = true
+  instance_size                 = var.instance_size
   gw_name                       = var.gw_name
   name                          = var.virtual_network_name
   region                        = module.regions.location
@@ -27,8 +28,9 @@ module "mc-firenet" {
   version                = "1.5.2"
   custom_fw_names        = var.firewall_name
   egress_enabled         = true
+  instance_size          = var.fw_instance_size
   firewall_image         = var.firewall_image
-  firewall_image_version = var.firewall_image
+  firewall_image_version = var.firewall_image_version
   fw_amount              = var.fw_amount
   username               = data.azurerm_key_vault_secret.secret-firewall-username.value
   password               = data.azurerm_key_vault_secret.secret-firewall-password.value

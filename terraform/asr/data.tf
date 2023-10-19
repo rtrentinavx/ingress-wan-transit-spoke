@@ -1,5 +1,5 @@
-data "azurerm_resource_group" "resource-group" { 
-    name = var.resource_group
+data "azurerm_resource_group" "resource-group" {
+  name = var.resource_group
 }
 
 data "azurerm_resource_group" "rg-keyvault" {
@@ -35,5 +35,5 @@ data "aviatrix_transit_gateway" "transit_gateway" {
 
 data "azurerm_virtual_network" "remote_virtual_network" {
   name                = split(":", data.aviatrix_transit_gateway.transit_gateway.vpc_id)[0]
-  resource_group_name = split(":",data.aviatrix_transit_gateway.transit_gateway.vpc_id)[1]
+  resource_group_name = split(":", data.aviatrix_transit_gateway.transit_gateway.vpc_id)[1]
 }

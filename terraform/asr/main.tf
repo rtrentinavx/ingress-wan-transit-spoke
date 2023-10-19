@@ -81,7 +81,7 @@ resource "azurerm_virtual_network_gateway" "vng" {
 
 resource "azurerm_virtual_network_peering" "transit_1_to_vng" {
   name                         = "transit-to-vng"
-  resource_group_name          = split(":",data.aviatrix_transit_gateway.transit_gateway.vpc_id)[1]
+  resource_group_name          = split(":", data.aviatrix_transit_gateway.transit_gateway.vpc_id)[1]
   virtual_network_name         = split(":", data.aviatrix_transit_gateway.transit_gateway.vpc_id)[0]
   remote_virtual_network_id    = module.vnet.vnet_id
   allow_virtual_network_access = true
@@ -100,42 +100,33 @@ resource "azurerm_virtual_network_peering" "vng_to_transit_1" {
 }
 
 resource "aviatrix_transit_external_device_conn" "transit_1_to_ars" {
-  vpc_id            = data.aviatrix_transit_gateway.transit_gateway.vpc_id
-  connection_name   = "transit_1_to_ars"
-  gw_name           = data.aviatrix_transit_gateway.transit_gateway.gw_name
-  connection_type   = "bgp"
-  tunnel_protocol   = "LAN"
-  bgp_local_as_num  = data.aviatrix_transit_gateway.transit_gateway.local_as_number
-  bgp_remote_as_num = azurerm_route_server.ars.virtual_router_asn
-  remote_lan_ip     = tolist(azurerm_route_server.ars.virtual_router_ips)[0]
-  local_lan_ip      = data.aviatrix_transit_gateway.transit_gateway.bgp_lan_ip_list[0]
-  remote_vpc_name = "${module.vnet.vnet_name}:${data.azurerm_resource_group.resource-group.name}:${split("/",module.vnet.vnet_id)[1]}"
-  }
+  backup_bgp_remote_as_num  = azurerm_route_server.ars.virtual_router_asn
+  backup_local_lan_ip       = data.aviatrix_transit_gateway.transit_gateway.ha_bgp_lan_ip_list [0]
+  backup_remote_lan_ip      = tolist(azurerm_route_server.ars.virtual_router_ips)[1]
+  bgp_local_as_num          = data.aviatrix_transit_gateway.transit_gateway.local_as_number
+  bgp_remote_as_num         = azurerm_route_server.ars.virtual_router_asn
+  connection_type           = "bgp"
+  connection_name           = "transit_1_to_ars"
+  enable_bgp_lan_activemesh = true
+  gw_name                   = data.aviatrix_transit_gateway.transit_gateway.gw_name
+  ha_enabled                = true
+  local_lan_ip              = data.aviatrix_transit_gateway.transit_gateway.bgp_lan_ip_list[0]
+  remote_lan_ip             = tolist(azurerm_route_server.ars.virtual_router_ips)[0]
+  remote_vpc_name           = "${module.vnet.vnet_name}:${data.azurerm_resource_group.resource-group.name}:${split("/", module.vnet.vnet_id)[2]}"
+  vpc_id                    = data.aviatrix_transit_gateway.transit_gateway.vpc_id
+  tunnel_protocol           = "LAN"
+}
 
+resource "azurerm_route_server_bgp_connection" "ars_to_transit_1_primary" {
+  name            = data.aviatrix_transit_gateway.transit_gateway.gw_name
+  route_server_id = azurerm_route_server.ars.id
+  peer_asn        = data.aviatrix_transit_gateway.transit_gateway.local_as_number
+  peer_ip         = data.aviatrix_transit_gateway.transit_gateway.bgp_lan_ip_list[0]
+}
 
-# resource "aviatrix_transit_external_device_conn" "ex-conn" {
-#   vpc_id            = aviatrix_transit_gateway.transit-gateway.vpc_id
-#   connection_name   = "my_conn"
-#   gw_name           = aviatrix_transit_gateway.transit-gateway.gw_name
-#   connection_type   = "bgp"
-#   tunnel_protocol   = "LAN"
-#   bgp_local_as_num  = "123"
-#   bgp_remote_as_num = "345"
-#   remote_lan_ip     = "172.12.13.14"
-#   local_lan_ip      = "172.12.13.15"
-#   remote_vpc_name   = "vnet-name:resource-group-name:subscription-id"
-# }
-
-# resource "azurerm_route_server_bgp_connection" "ars_to_transit_1_primary" {
-#   name            = var.transit_gateway
-#   route_server_id = azurerm_route_server.ars.id
-#   peer_asn        = data.aviatrix_transit_gateway.transit_gateway.local_as_number
-#   peer_ip         = data.aviatrix_transit_gateway.transit_gateway.
-# }
-
-# resource "azurerm_route_server_bgp_connection" "ars_to_transit_1_hagw" {
-#   name            = module.mc-transit-1.transit_gateway.ha_gw_name
-#   route_server_id = azurerm_route_server.ars.id
-#   peer_asn        = module.mc-transit-1.transit_gateway.local_as_number
-#   peer_ip         = aviatrix_transit_external_device_conn.transit_1_to_ars.backup_local_lan_ip
-# }
+resource "azurerm_route_server_bgp_connection" "ars_to_transit_1_secondary" {
+  name            = data.aviatrix_transit_gateway.transit_gateway.ha_gw_name
+  route_server_id = azurerm_route_server.ars.id
+  peer_asn        = data.aviatrix_transit_gateway.transit_gateway.local_as_number
+  peer_ip         = data.aviatrix_transit_gateway.transit_gateway.ha_bgp_lan_ip_list[0]
+}
