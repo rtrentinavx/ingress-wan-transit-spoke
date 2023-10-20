@@ -11,13 +11,13 @@ resource "azurerm_virtual_machine" "passivefgtvm" {
   storage_image_reference {
     publisher =  var.publisher
     offer     =  var.fgtoffer
-    sku       = var.license_type == "byol" ? var.fgtsku["byol"] : var.fgtsku["payg"]
+    sku       = var.firewall_image == "byol" ? var.fgtsku["byol"] : var.fgtsku["payg"]
     version   = var.firewall_image_version
     id        = null
   }
 
   plan {
-    name      = var.license_type == "byol" ? var.fgtsku["byol"] : var.fgtsku["payg"]
+    name      = var.firewall_image == "byol" ? var.fgtsku["byol"] : var.fgtsku["payg"]
     publisher = var.publisher
     product   = var.fgtoffer
   }
@@ -43,7 +43,7 @@ resource "azurerm_virtual_machine" "passivefgtvm" {
     admin_username = data.azurerm_key_vault_secret.secret-firewall-username.value
     admin_password = data.azurerm_key_vault_secret.secret-firewall-password.value
     custom_data    = templatefile("${path.module}/config-passive.conf", {
-    type            = var.license_type
+    type            = var.firewall_image
     license_file    = var.license2
     port1_ip        = var.passiveport1
     port1_mask      = var.passiveport1mask
@@ -64,7 +64,7 @@ resource "azurerm_virtual_machine" "passivefgtvm" {
     routename       = azurerm_route_table.internal.name
   })
   }
-  
+
   os_profile_linux_config {
     disable_password_authentication = false
   }

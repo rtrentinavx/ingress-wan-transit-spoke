@@ -306,7 +306,7 @@ resource "aviatrix_transit_external_device_conn" "transit_1_to_forti" {
   bgp_remote_as_num         = var.forti_as_num
   connection_type           = "bgp"
   connection_name           = "transit_1_to_forti"
-  enable_bgp_lan_activemesh = true
+  enable_bgp_lan_activemesh = false
   gw_name                   = data.aviatrix_transit_gateway.transit_gateway.gw_name
   ha_enabled                = true
   local_lan_ip              = data.aviatrix_transit_gateway.transit_gateway.bgp_lan_ip_list[1]

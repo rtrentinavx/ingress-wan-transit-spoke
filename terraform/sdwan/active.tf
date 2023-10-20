@@ -10,13 +10,13 @@ resource "azurerm_virtual_machine" "activefgtvm" {
   storage_image_reference {
     publisher = var.publisher
     offer     = var.fgtoffer
-    sku       = var.license_type == "byol" ? var.fgtsku["byol"] : var.fgtsku["payg"]
+    sku       = var.firewall_image == "byol" ? var.fgtsku["byol"] : var.fgtsku["payg"]
     version   = var.firewall_image_version
     id        = null
   }
 
   plan {
-    name      = var.license_type == "byol" ? var.fgtsku["byol"] : var.fgtsku["payg"]
+    name      = var.firewall_image == "byol" ? var.fgtsku["byol"] : var.fgtsku["payg"]
     publisher = var.publisher
     product   = var.fgtoffer
   }
@@ -42,7 +42,7 @@ resource "azurerm_virtual_machine" "activefgtvm" {
     admin_username = data.azurerm_key_vault_secret.secret-firewall-username.value
     admin_password = data.azurerm_key_vault_secret.secret-firewall-password.value
     custom_data    = templatefile("${path.module}/config-active.conf", {
-    type         = var.license_type
+    type         = var.firewall_image
     license_file = var.license
     port1_ip     = var.activeport1
     port1_mask   = var.activeport1mask

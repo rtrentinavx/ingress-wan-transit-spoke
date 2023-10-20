@@ -28,7 +28,7 @@ variable "zone2" {
   type    = string
   default = "2"
 }
-variable "license_type" {  default = "byol" }
+variable "firewall_image" {  default = "payg" }
 variable "accelerate" { default = "true" }
 variable "publisher" {
   type    = string
@@ -42,7 +42,7 @@ variable "fgtsku" {
   type = map(any)
   default = {
     byol = "fortinet_fg-vm"
-    payg = "fortinet_fg-vm_payg_2022"
+    payg = "fortinet_fg-vm_payg_2023"
   }
 }
 variable "adminsport" {
@@ -64,15 +64,6 @@ variable "passiveport3mask" { type = string }
 variable "port1gateway" { type = string }
 variable "port2gateway" { type = string }
 variable forti_as_num { type = string }
-variable "bootstrap-active" {
-  type    = string
-  default = "config-active.conf"
-}
-variable "bootstrap-passive" {
-  type    = string
-  default = "config-passive.conf"
-}
-
 variable "license" {
   type    = string
   default = "license.txt"
