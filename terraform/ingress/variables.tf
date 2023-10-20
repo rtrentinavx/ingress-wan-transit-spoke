@@ -79,4 +79,7 @@ variable "license2" {
   type    = string
   default = "license2.txt"
 }
-
+variable "enable_max_performance" { type = bool }
+variable "insane_mode" { type = bool }
+variable "gw_name" { type = string }
+variable "instance_size" { type = string }

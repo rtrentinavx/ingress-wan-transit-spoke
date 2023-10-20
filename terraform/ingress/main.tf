@@ -50,13 +50,14 @@ resource "azurerm_application_gateway" "appgw" {
   }
 
   probe {
-    name                = "probe-${var.appgw_name}"
-    interval            = var.probe-interval
-    timeout             = (3 * var.probe-interval)
-    protocol            = var.be-protocol
-    port                = var.be-port
-    path                = var.be-path
-    unhealthy_threshold = 3
+    name                                      = "probe-${var.appgw_name}"
+    interval                                  = var.probe-interval
+    timeout                                   = (3 * var.probe-interval)
+    protocol                                  = var.be-protocol
+    port                                      = var.be-port
+    path                                      = var.be-path
+    unhealthy_threshold                       = 3
+    pick_host_name_from_backend_http_settings = true
   }
 
   backend_http_settings {
@@ -69,17 +70,17 @@ resource "azurerm_application_gateway" "appgw" {
     probe_name            = "probe-${var.appgw_name}"
   }
 
-  ssl_certificate {
-    name                = "cert-${var.appgw_name}"
-    key_vault_secret_id = data.azurerm_key_vault_secret.secret-appgw-cert.value
-  }
+  # ssl_certificate {
+  #   name                = "cert-${var.appgw_name}"
+  #   key_vault_secret_id = data.azurerm_key_vault_secret.secret-appgw-cert.value
+  # }
 
   http_listener {
     name                           = "listener-${var.appgw_name}"
     frontend_ip_configuration_name = "feip-${var.appgw_name}"
     frontend_port_name             = "fe-port-${var.appgw_name}"
     protocol                       = var.fe-protocol
-    ssl_certificate_name           = "cert-${var.appgw_name}"
+    # ssl_certificate_name           = "cert-${var.appgw_name}"
   }
 
   request_routing_rule {
@@ -356,3 +357,27 @@ resource "azurerm_storage_account" "fgtstorageaccount" {
   account_tier             = "Standard"
   tags                     = var.tags
 }
+
+
+
+module "mc-spoke" {
+  source                 = "terraform-aviatrix-modules/mc-spoke/aviatrix"
+  version                = "1.6.5"
+  cloud                  = "Azure"
+  name                   = var.virtual_network_name
+  region                 = data.azurerm_resource_group.resource-group.location
+  cidr                   = var.address_space
+  account                = data.azurerm_subscription.current.display_name
+  transit_gw             = var.transit_gateway
+  enable_max_performance = var.enable_max_performance
+  insane_mode            = var.insane_mode
+  gw_name                = var.gw_name
+  gw_subnet              = module.vnet.vnet_subnets["gw-subnet"]
+  hagw_subnet            = module.vnet.vnet_subnets["hwgw-subnet"]
+  inspection             = true
+  instance_size          = var.instance_size
+  tags                   = var.tags
+  use_existing_vpc       = true
+  vpc_id                 = module.vnet.vnet_id
+}
+
