@@ -57,7 +57,7 @@ resource "azurerm_virtual_machine" "passivefgtvm" {
     tenant          = var.tenant_id
     subscription    = var.subscription_id
     clientid        = var.client_id
-    clientsecret    = var.client_secret
+    clientsecret    = data.azurerm_key_vault_secret.secret-forti_client_secret.value
     adminsport      = var.adminsport
     rsg             = data.azurerm_resource_group.resource-group.name
     clusterip       = azurerm_public_ip.ClusterPublicIP.name
