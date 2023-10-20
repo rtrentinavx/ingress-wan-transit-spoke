@@ -36,7 +36,7 @@ resource "azurerm_application_gateway" "appgw" {
 
   frontend_port {
     name = "fe-port-${var.appgw_name}"
-    port = var.fe-port 
+    port = var.fe-port
   }
 
   frontend_ip_configuration {
@@ -51,9 +51,9 @@ resource "azurerm_application_gateway" "appgw" {
   backend_http_settings {
     name                  = "be-${var.appgw_name}"
     cookie_based_affinity = "Disabled"
-    path                  = var.be-path 
+    path                  = var.be-path
     port                  = var.be-port
-    protocol              = var.be-protocol 
+    protocol              = var.be-protocol
     request_timeout       = 60
   }
 
@@ -61,7 +61,7 @@ resource "azurerm_application_gateway" "appgw" {
     name                           = "listener-${var.appgw_name}"
     frontend_ip_configuration_name = "feip-${var.appgw_name}"
     frontend_port_name             = "fe-port-${var.appgw_name}"
-    protocol                       = "var.fe-protocol"
+    protocol                       = var.fe-protocol
   }
 
   request_routing_rule {
@@ -95,32 +95,32 @@ resource "azurerm_subnet_route_table_association" "internalassociate" {
   route_table_id = azurerm_route_table.internal.id
 }
 
-resource "azurerm_public_ip" "ClusterPublicIP" {
-  name                = "ClusterPublicIP"
-  location            = data.azurerm_resource_group.resource-group.location
-  resource_group_name = data.azurerm_resource_group.resource-group.name
-  sku                 = "Standard"
-  allocation_method   = "Static"
-  tags                = var.tags
-}
+# resource "azurerm_public_ip" "ClusterPublicIP" {
+#   name                = "ClusterPublicIP"
+#   location            = data.azurerm_resource_group.resource-group.location
+#   resource_group_name = data.azurerm_resource_group.resource-group.name
+#   sku                 = "Standard"
+#   allocation_method   = "Static"
+#   tags                = var.tags
+# }
 
-resource "azurerm_public_ip" "ActiveMGMTIP" {
-  name                = "ActiveMGMTIP"
-  location            = data.azurerm_resource_group.resource-group.location
-  resource_group_name = data.azurerm_resource_group.resource-group.name
-  sku                 = "Standard"
-  allocation_method   = "Static"
-  tags                = var.tags
-}
+# resource "azurerm_public_ip" "ActiveMGMTIP" {
+#   name                = "ActiveMGMTIP"
+#   location            = data.azurerm_resource_group.resource-group.location
+#   resource_group_name = data.azurerm_resource_group.resource-group.name
+#   sku                 = "Standard"
+#   allocation_method   = "Static"
+#   tags                = var.tags
+# }
 
-resource "azurerm_public_ip" "PassiveMGMTIP" {
-  name                = "PassiveMGMTIP"
-  location            = data.azurerm_resource_group.resource-group.location
-  resource_group_name = data.azurerm_resource_group.resource-group.name
-  sku                 = "Standard"
-  allocation_method   = "Static"
-  tags                = var.tags
-}
+# resource "azurerm_public_ip" "PassiveMGMTIP" {
+#   name                = "PassiveMGMTIP"
+#   location            = data.azurerm_resource_group.resource-group.location
+#   resource_group_name = data.azurerm_resource_group.resource-group.name
+#   sku                 = "Standard"
+#   allocation_method   = "Static"
+#   tags                = var.tags
+# }
 
 resource "azurerm_network_security_group" "publicnetworknsg" {
   name                = "PublicNetworkSecurityGroup"
@@ -196,11 +196,11 @@ resource "azurerm_network_interface" "activeport1" {
 
   ip_configuration {
     name                          = "ipconfig1"
-    subnet_id                     = module.vnet.vnet_subnets_name_id["hamgmtsubnet"]
+    subnet_id                     = module.vnet.vnet_subnets_name_id["mgmtsubnet"]
     private_ip_address_allocation = "Static"
     private_ip_address            = var.activeport1
     primary                       = true
-    public_ip_address_id          = azurerm_public_ip.ActiveMGMTIP.id
+    #public_ip_address_id          = azurerm_public_ip.ActiveMGMTIP.id
   }
   tags = var.tags
 }
@@ -217,7 +217,7 @@ resource "azurerm_network_interface" "activeport2" {
     subnet_id                     = module.vnet.vnet_subnets_name_id["publicsubnet"]
     private_ip_address_allocation = "Static"
     private_ip_address            = var.activeport2
-    public_ip_address_id          = azurerm_public_ip.ClusterPublicIP.id
+    #public_ip_address_id          = azurerm_public_ip.ClusterPublicIP.id
   }
   tags = var.tags
 }
@@ -264,11 +264,11 @@ resource "azurerm_network_interface" "passiveport1" {
 
   ip_configuration {
     name                          = "ipconfig1"
-    subnet_id                     = module.vnet.vnet_subnets_name_id["hamgmtsubnet"]
+    subnet_id                     = module.vnet.vnet_subnets_name_id["mgmtsubnet"]
     private_ip_address_allocation = "Static"
     private_ip_address            = var.passiveport1
     primary                       = true
-    public_ip_address_id          = azurerm_public_ip.PassiveMGMTIP.id
+    #public_ip_address_id          = azurerm_public_ip.PassiveMGMTIP.id
   }
   tags = var.tags
 }

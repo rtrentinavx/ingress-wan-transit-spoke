@@ -14,17 +14,17 @@ variable "virtual_network_name" { type = string }
 variable "address_space" { type = list(string) }
 variable "subnet_names" { type = list(string) }
 variable "subnet_prefixes" { type = list(string) }
-
 variable "appgw_name" { type = string }
 variable "fe-port" { type = string }
-variable be-path { type = string }
-variable be-port { type = string }
-variable be-protocol { type = string }
-
+variable "fe-protocol" { type = string }
+variable "be-path" { type = string }
+variable "be-port" { type = string }
+variable "be-protocol" { type = string }
+variable ssl_certificate { type = sting }
 variable "tags" { type = map(string) }
 variable "transit_gateway" { type = string }
-variable "firewall_name" { type = list(string)  }
-variable "fw_instance_size" {  type    = string }
+variable "firewall_name" { type = list(string) }
+variable "fw_instance_size" { type = string }
 variable "firewall_image_version" { type = string }
 variable "zone1" {
   type    = string
@@ -34,7 +34,7 @@ variable "zone2" {
   type    = string
   default = "2"
 }
-variable "firewall_image" {  default = "payg" }
+variable "firewall_image" { default = "payg" }
 variable "accelerate" { default = "true" }
 variable "publisher" {
   type    = string
@@ -56,7 +56,7 @@ variable "adminsport" {
   default = "8443"
 }
 variable "activeport1" { type = string }
-variable "activeport1mask" {type = string }
+variable "activeport1mask" { type = string }
 variable "activeport2" { type = string }
 variable "activeport2mask" { type = string }
 variable "activeport3" { type = string }
@@ -69,7 +69,7 @@ variable "passiveport3" { type = string }
 variable "passiveport3mask" { type = string }
 variable "port1gateway" { type = string }
 variable "port2gateway" { type = string }
-variable forti_as_num { type = string }
+variable "forti_as_num" { type = string }
 variable "license" {
   type    = string
   default = "license.txt"

@@ -41,28 +41,28 @@ resource "azurerm_virtual_machine" "activefgtvm" {
     computer_name  = var.firewall_name[0]
     admin_username = data.azurerm_key_vault_secret.secret-firewall-username.value
     admin_password = data.azurerm_key_vault_secret.secret-firewall-password.value
-    custom_data    = templatefile("${path.module}/config-active.conf", {
-    type         = var.firewall_image
-    license_file = var.license
-    port1_ip     = var.activeport1
-    port1_mask   = var.activeport1mask
-    port2_ip     = var.activeport2
-    port2_mask   = var.activeport2mask
-    port3_ip     = var.activeport3
-    port3_mask   = var.activeport3mask
-    passive_peerip  = var.passiveport1
-    mgmt_gateway_ip = var.port1gateway
-    defaultgwy      = var.port2gateway
-    tenant          = var.tenant_id
-    subscription    = var.subscription_id
-    clientid        = var.client_id
-    clientsecret    = data.azurerm_key_vault_secret.secret-forti_client_secret.value
-    adminsport      = var.adminsport
-    rsg             = data.azurerm_resource_group.resource-group.name
-    clusterip       = azurerm_public_ip.ClusterPublicIP.name
-    routename       = azurerm_route_table.internal.name
-  } )
-    }
+    custom_data = templatefile("${path.module}/config-active.conf", {
+      type            = var.firewall_image
+      license_file    = var.license
+      port1_ip        = var.activeport1
+      port1_mask      = var.activeport1mask
+      port2_ip        = var.activeport2
+      port2_mask      = var.activeport2mask
+      port3_ip        = var.activeport3
+      port3_mask      = var.activeport3mask
+      passive_peerip  = var.passiveport1
+      mgmt_gateway_ip = var.port1gateway
+      defaultgwy      = var.port2gateway
+      # tenant          = var.tenant_id
+      # subscription    = var.subscription_id
+      # clientid        = var.client_id
+      # clientsecret    = data.azurerm_key_vault_secret.secret-forti_client_secret.value
+      adminsport      = var.adminsport
+      # rsg             = data.azurerm_resource_group.resource-group.name
+      # clusterip       = azurerm_public_ip.ClusterPublicIP.name
+      # routename       = azurerm_route_table.internal.name
+    })
+  }
 
   os_profile_linux_config {
     disable_password_authentication = false
