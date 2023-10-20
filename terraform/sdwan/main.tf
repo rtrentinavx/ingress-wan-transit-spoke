@@ -300,7 +300,7 @@ resource "azurerm_virtual_network_peering" "transit_1_to_sdwan" {
 
 resource "aviatrix_transit_external_device_conn" "transit_1_to_forti" {
   backup_bgp_remote_as_num  = var.forti_as_num
-  backup_local_lan_ip       = data.aviatrix_transit_gateway.transit_gateway.ha_bgp_lan_ip_list[0]
+  backup_local_lan_ip       = data.aviatrix_transit_gateway.transit_gateway.ha_bgp_lan_ip_list[1]
   backup_remote_lan_ip      = var.passiveport3
   bgp_local_as_num          = data.aviatrix_transit_gateway.transit_gateway.local_as_number
   bgp_remote_as_num         = var.forti_as_num
@@ -309,7 +309,7 @@ resource "aviatrix_transit_external_device_conn" "transit_1_to_forti" {
   enable_bgp_lan_activemesh = true
   gw_name                   = data.aviatrix_transit_gateway.transit_gateway.gw_name
   ha_enabled                = true
-  local_lan_ip              = data.aviatrix_transit_gateway.transit_gateway.bgp_lan_ip_list[0]
+  local_lan_ip              = data.aviatrix_transit_gateway.transit_gateway.bgp_lan_ip_list[1]
   remote_lan_ip             = var.activeport3
   remote_vpc_name           = "${module.vnet.vnet_name}:${data.azurerm_resource_group.resource-group.name}:${split("/", module.vnet.vnet_id)[2]}"
   vpc_id                    = data.aviatrix_transit_gateway.transit_gateway.vpc_id
