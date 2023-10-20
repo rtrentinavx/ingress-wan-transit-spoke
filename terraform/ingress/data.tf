@@ -47,6 +47,11 @@ data "azurerm_key_vault_secret" "secret-forti_client_secret" {
   key_vault_id = data.azurerm_key_vault.keyvault.id
 }
 
+data "azurerm_key_vault_secret" "secret-appgw-cert" {
+  name         = "appgw-cert"
+  key_vault_id = data.azurerm_key_vault.keyvault.id
+}
+
 data "aviatrix_transit_gateway" "transit_gateway" {
   gw_name = var.transit_gateway
 }

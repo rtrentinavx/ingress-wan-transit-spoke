@@ -57,7 +57,7 @@ resource "azurerm_virtual_machine" "activefgtvm" {
       # subscription    = var.subscription_id
       # clientid        = var.client_id
       # clientsecret    = data.azurerm_key_vault_secret.secret-forti_client_secret.value
-      adminsport      = var.adminsport
+      adminsport = var.adminsport
       # rsg             = data.azurerm_resource_group.resource-group.name
       # clusterip       = azurerm_public_ip.ClusterPublicIP.name
       # routename       = azurerm_route_table.internal.name

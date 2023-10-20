@@ -24,8 +24,8 @@ resource "azurerm_application_gateway" "appgw" {
   location            = data.azurerm_resource_group.resource-group.location
 
   sku {
-    name     = "Standard_v2"
-    tier     = "Standard_v2"
+    name     = var.appgw_sku
+    tier     = var.appgw_sku
     capacity = 2
   }
 
@@ -45,7 +45,18 @@ resource "azurerm_application_gateway" "appgw" {
   }
 
   backend_address_pool {
-    name = "pool-${var.appgw_name}"
+    name         = "pool-${var.appgw_name}"
+    ip_addresses = ["${var.activeport2}", "${var.passiveport2}"]
+  }
+
+  probe {
+    name                = "probe-${var.appgw_name}"
+    interval            = var.probe-interval
+    timeout             = (3 * var.probe-interval)
+    protocol            = var.be-protocol
+    port                = var.be-port
+    path                = var.be-path
+    unhealthy_threshold = 3
   }
 
   backend_http_settings {
@@ -55,6 +66,12 @@ resource "azurerm_application_gateway" "appgw" {
     port                  = var.be-port
     protocol              = var.be-protocol
     request_timeout       = 60
+    probe_name            = "probe-${var.appgw_name}"
+  }
+
+  ssl_certificate {
+    name                = "cert-${var.appgw_name}"
+    key_vault_secret_id = data.azurerm_key_vault_secret.secret-appgw-cert.value
   }
 
   http_listener {
@@ -62,6 +79,7 @@ resource "azurerm_application_gateway" "appgw" {
     frontend_ip_configuration_name = "feip-${var.appgw_name}"
     frontend_port_name             = "fe-port-${var.appgw_name}"
     protocol                       = var.fe-protocol
+    ssl_certificate_name           = "cert-${var.appgw_name}"
   }
 
   request_routing_rule {
