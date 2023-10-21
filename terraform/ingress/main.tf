@@ -15,7 +15,10 @@ resource "azurerm_public_ip" "pip-appgw" {
   name                = "pip-${var.appgw_name}"
   resource_group_name = data.azurerm_resource_group.resource-group.name
   location            = data.azurerm_resource_group.resource-group.location
-  allocation_method   = "Dynamic"
+  allocation_method   = "Static"
+  sku = "Standard"
+  sku_tier = "Regional"
+  tags = var.tags
 }
 
 resource "azurerm_application_gateway" "appgw" {
@@ -61,13 +64,14 @@ resource "azurerm_application_gateway" "appgw" {
   }
 
   backend_http_settings {
-    name                  = "be-${var.appgw_name}"
-    cookie_based_affinity = "Disabled"
-    path                  = var.be-path
-    port                  = var.be-port
-    protocol              = var.be-protocol
-    request_timeout       = 60
-    probe_name            = "probe-${var.appgw_name}"
+    name                                = "be-${var.appgw_name}"
+    cookie_based_affinity               = "Disabled"
+    path                                = var.be-path
+    port                                = var.be-port
+    protocol                            = var.be-protocol
+    request_timeout                     = 60
+    probe_name                          = "probe-${var.appgw_name}"
+    pick_host_name_from_backend_address = true
   }
 
   # ssl_certificate {
@@ -84,7 +88,7 @@ resource "azurerm_application_gateway" "appgw" {
   }
 
   request_routing_rule {
-    name                       = "rule-$var.appgw_name}"
+    name                       = "rule-${var.appgw_name}"
     priority                   = 10
     rule_type                  = "Basic"
     http_listener_name         = "listener-${var.appgw_name}"
@@ -113,34 +117,6 @@ resource "azurerm_subnet_route_table_association" "internalassociate" {
   subnet_id      = module.vnet.vnet_subnets_name_id["privatesubnet"]
   route_table_id = azurerm_route_table.internal.id
 }
-
-# resource "azurerm_public_ip" "ClusterPublicIP" {
-#   name                = "ClusterPublicIP"
-#   location            = data.azurerm_resource_group.resource-group.location
-#   resource_group_name = data.azurerm_resource_group.resource-group.name
-#   sku                 = "Standard"
-#   allocation_method   = "Static"
-#   tags                = var.tags
-# }
-
-# resource "azurerm_public_ip" "ActiveMGMTIP" {
-#   name                = "ActiveMGMTIP"
-#   location            = data.azurerm_resource_group.resource-group.location
-#   resource_group_name = data.azurerm_resource_group.resource-group.name
-#   sku                 = "Standard"
-#   allocation_method   = "Static"
-#   tags                = var.tags
-# }
-
-# resource "azurerm_public_ip" "PassiveMGMTIP" {
-#   name                = "PassiveMGMTIP"
-#   location            = data.azurerm_resource_group.resource-group.location
-#   resource_group_name = data.azurerm_resource_group.resource-group.name
-#   sku                 = "Standard"
-#   allocation_method   = "Static"
-#   tags                = var.tags
-# }
-
 resource "azurerm_network_security_group" "publicnetworknsg" {
   name                = "PublicNetworkSecurityGroup"
   location            = data.azurerm_resource_group.resource-group.location
@@ -219,7 +195,6 @@ resource "azurerm_network_interface" "activeport1" {
     private_ip_address_allocation = "Static"
     private_ip_address            = var.activeport1
     primary                       = true
-    #public_ip_address_id          = azurerm_public_ip.ActiveMGMTIP.id
   }
   tags = var.tags
 }
@@ -236,7 +211,6 @@ resource "azurerm_network_interface" "activeport2" {
     subnet_id                     = module.vnet.vnet_subnets_name_id["publicsubnet"]
     private_ip_address_allocation = "Static"
     private_ip_address            = var.activeport2
-    #public_ip_address_id          = azurerm_public_ip.ClusterPublicIP.id
   }
   tags = var.tags
 }
@@ -287,7 +261,6 @@ resource "azurerm_network_interface" "passiveport1" {
     private_ip_address_allocation = "Static"
     private_ip_address            = var.passiveport1
     primary                       = true
-    #public_ip_address_id          = azurerm_public_ip.PassiveMGMTIP.id
   }
   tags = var.tags
 }
@@ -358,26 +331,30 @@ resource "azurerm_storage_account" "fgtstorageaccount" {
   tags                     = var.tags
 }
 
-
+module "regions" {
+  source       = "claranet/regions/azurerm"
+  version      = "7.0.0"
+  azure_region = data.azurerm_resource_group.resource-group.location
+}
 
 module "mc-spoke" {
   source                 = "terraform-aviatrix-modules/mc-spoke/aviatrix"
   version                = "1.6.5"
   cloud                  = "Azure"
   name                   = var.virtual_network_name
-  region                 = data.azurerm_resource_group.resource-group.location
-  cidr                   = var.address_space
+  region                 = module.regions.location
+  cidr                   = element(var.address_space, 0)
   account                = data.azurerm_subscription.current.display_name
   transit_gw             = var.transit_gateway
-  enable_max_performance = var.enable_max_performance
+  enable_max_performance = var.enable_max_performance != false ? var.enable_max_performance : null
   insane_mode            = var.insane_mode
   gw_name                = var.gw_name
-  gw_subnet              = module.vnet.vnet_subnets["gw-subnet"]
-  hagw_subnet            = module.vnet.vnet_subnets["hwgw-subnet"]
+  gw_subnet              = var.subnet_prefixes[0]
+  hagw_subnet            = var.subnet_prefixes[1]
   inspection             = true
   instance_size          = var.instance_size
   tags                   = var.tags
   use_existing_vpc       = true
-  vpc_id                 = module.vnet.vnet_id
+  vpc_id                 = "${module.vnet.vnet_name}:${data.azurerm_resource_group.resource-group.name}:${module.vnet.vnet_guid}"
 }
 

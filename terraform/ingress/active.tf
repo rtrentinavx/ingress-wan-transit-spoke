@@ -53,14 +53,7 @@ resource "azurerm_virtual_machine" "activefgtvm" {
       passive_peerip  = var.passiveport1
       mgmt_gateway_ip = var.port1gateway
       defaultgwy      = var.port2gateway
-      # tenant          = var.tenant_id
-      # subscription    = var.subscription_id
-      # clientid        = var.client_id
-      # clientsecret    = data.azurerm_key_vault_secret.secret-forti_client_secret.value
-      adminsport = var.adminsport
-      # rsg             = data.azurerm_resource_group.resource-group.name
-      # clusterip       = azurerm_public_ip.ClusterPublicIP.name
-      # routename       = azurerm_route_table.internal.name
+      adminsport      = var.adminsport
     })
   }
 
