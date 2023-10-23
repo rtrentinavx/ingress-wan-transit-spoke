@@ -51,12 +51,12 @@ resource "azurerm_virtual_machine" "passivefgtvm" {
       port1_mask      = cidrnetmask(var.subnet_prefixes[3])
       port2_ip        = cidrhost(var.subnet_prefixes[4], 5)
       port2_mask      = cidrnetmask(var.subnet_prefixes[4])
-      port3_ip        = cidrhost(var.subnet_prefixes[5], 5)
-      port3_mask      = cidrnetmask(var.subnet_prefixes[5])
+      port3_ip        = cidrhost(var.subnet_prefixes[6], 5)
+      port3_mask      = cidrnetmask(var.subnet_prefixes[6])
       active_peerip   = cidrhost(var.subnet_prefixes[3], 4)
       mgmt_gateway_ip = cidrhost(var.subnet_prefixes[3], 1)
       defaultgwy      = cidrhost(var.subnet_prefixes[4], 1)
-      rfc1918gwy      = cidrhost(var.subnet_prefixes[5], 1)
+      rfc1918gwy      = cidrhost(var.subnet_prefixes[6], 1)
       adminsport      = var.adminsport
     })
   }

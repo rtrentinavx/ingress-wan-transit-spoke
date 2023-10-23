@@ -25,7 +25,7 @@ resource "azurerm_route" "default" {
   route_table_name       = azurerm_route_table.internal.name
   address_prefix         = "0.0.0.0/0"
   next_hop_type          = "VirtualAppliance"
-  next_hop_in_ip_address = cidrhost(var.subnet_prefixes[2],4)
+  next_hop_in_ip_address = cidrhost(var.subnet_prefixes[2], 4)
 }
 
 resource "azurerm_subnet_route_table_association" "internalassociate" {
@@ -141,7 +141,7 @@ resource "azurerm_network_interface" "activeport1" {
     name                          = "ipconfig1"
     subnet_id                     = module.vnet.vnet_subnets_name_id["hamgmtsubnet"]
     private_ip_address_allocation = "Static"
-    private_ip_address            = cidrhost(var.subnet_prefixes[0],4)
+    private_ip_address            = cidrhost(var.subnet_prefixes[0], 4)
     primary                       = true
     public_ip_address_id          = azurerm_public_ip.ActiveMGMTIP.id
   }
@@ -159,7 +159,7 @@ resource "azurerm_network_interface" "activeport2" {
     name                          = "ipconfig1"
     subnet_id                     = module.vnet.vnet_subnets_name_id["publicsubnet"]
     private_ip_address_allocation = "Static"
-    private_ip_address            = cidrhost(var.subnet_prefixes[1],4)
+    private_ip_address            = cidrhost(var.subnet_prefixes[1], 4)
     public_ip_address_id          = azurerm_public_ip.ClusterPublicIP.id
   }
   tags = var.tags
@@ -176,7 +176,7 @@ resource "azurerm_network_interface" "activeport3" {
     name                          = "ipconfig1"
     subnet_id                     = module.vnet.vnet_subnets_name_id["privatesubnet"]
     private_ip_address_allocation = "Static"
-    private_ip_address            = cidrhost(var.subnet_prefixes[2],4)
+    private_ip_address            = cidrhost(var.subnet_prefixes[2], 4)
   }
   tags = var.tags
 }
@@ -209,7 +209,7 @@ resource "azurerm_network_interface" "passiveport1" {
     name                          = "ipconfig1"
     subnet_id                     = module.vnet.vnet_subnets_name_id["hamgmtsubnet"]
     private_ip_address_allocation = "Static"
-    private_ip_address            = cidrhost(var.subnet_prefixes[0],5)
+    private_ip_address            = cidrhost(var.subnet_prefixes[0], 5)
     primary                       = true
     public_ip_address_id          = azurerm_public_ip.PassiveMGMTIP.id
   }
@@ -227,7 +227,7 @@ resource "azurerm_network_interface" "passiveport2" {
     name                          = "ipconfig1"
     subnet_id                     = module.vnet.vnet_subnets_name_id["publicsubnet"]
     private_ip_address_allocation = "Static"
-    private_ip_address            = cidrhost(var.subnet_prefixes[1],5)
+    private_ip_address            = cidrhost(var.subnet_prefixes[1], 5)
   }
   tags = var.tags
 }
@@ -243,7 +243,7 @@ resource "azurerm_network_interface" "passiveport3" {
     name                          = "ipconfig1"
     subnet_id                     = module.vnet.vnet_subnets_name_id["privatesubnet"]
     private_ip_address_allocation = "Static"
-    private_ip_address            = cidrhost(var.subnet_prefixes[2],5)
+    private_ip_address            = cidrhost(var.subnet_prefixes[2], 5)
   }
   tags = var.tags
 }
@@ -307,7 +307,7 @@ resource "aviatrix_transit_external_device_conn" "transit_1_to_forti" {
   depends_on                = [azurerm_virtual_network_peering.transit_1_to_sdwan, azurerm_virtual_network_peering.sdwan-to-transit_1]
   backup_bgp_remote_as_num  = var.firewall_as_num
   backup_local_lan_ip       = data.aviatrix_transit_gateway.transit_gateway.ha_bgp_lan_ip_list[1]
-  backup_remote_lan_ip      = cidrhost(var.subnet_prefixes[2],5)
+  backup_remote_lan_ip      = cidrhost(var.subnet_prefixes[2], 5)
   bgp_local_as_num          = data.aviatrix_transit_gateway.transit_gateway.local_as_number
   bgp_remote_as_num         = var.firewall_as_num
   connection_type           = "bgp"
@@ -316,7 +316,7 @@ resource "aviatrix_transit_external_device_conn" "transit_1_to_forti" {
   gw_name                   = data.aviatrix_transit_gateway.transit_gateway.gw_name
   ha_enabled                = true
   local_lan_ip              = data.aviatrix_transit_gateway.transit_gateway.bgp_lan_ip_list[1]
-  remote_lan_ip             = cidrhost(var.subnet_prefixes[2],4)
+  remote_lan_ip             = cidrhost(var.subnet_prefixes[2], 4)
   remote_vpc_name           = "${module.vnet.vnet_name}:${data.azurerm_resource_group.resource-group.name}:${split("/", module.vnet.vnet_id)[2]}"
   vpc_id                    = data.aviatrix_transit_gateway.transit_gateway.vpc_id
   tunnel_protocol           = "LAN"
