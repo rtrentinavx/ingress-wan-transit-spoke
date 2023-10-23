@@ -6,6 +6,8 @@ resource "azurerm_virtual_machine" "activefgtvm" {
   primary_network_interface_id = azurerm_network_interface.activeport1.id
   vm_size                      = var.firewall_instance_size
   zones                        = [var.zone1]
+  delete_os_disk_on_termination = true
+  delete_data_disks_on_termination = true
 
   storage_image_reference {
     publisher = var.publisher
@@ -35,6 +37,7 @@ resource "azurerm_virtual_machine" "activefgtvm" {
     create_option     = "Empty"
     lun               = 0
     disk_size_gb      = "30"
+  
   }
 
   os_profile {

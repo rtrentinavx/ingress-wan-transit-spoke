@@ -341,6 +341,7 @@ module "regions" {
 }
 
 module "mc-spoke" {
+  depends_on = [ azurerm_subnet_route_table_association.internalassociate ]
   source                 = "terraform-aviatrix-modules/mc-spoke/aviatrix"
   version                = "1.6.5"
   cloud                  = "Azure"
