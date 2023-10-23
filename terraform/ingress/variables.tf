@@ -56,20 +56,6 @@ variable "adminsport" {
   type    = string
   default = "8443"
 }
-variable "activeport1" { type = string }
-variable "activeport1mask" { type = string }
-variable "activeport2" { type = string }
-variable "activeport2mask" { type = string }
-variable "activeport3" { type = string }
-variable "activeport3mask" { type = string }
-variable "passiveport1" { type = string }
-variable "passiveport1mask" { type = string }
-variable "passiveport2" { type = string }
-variable "passiveport2mask" { type = string }
-variable "passiveport3" { type = string }
-variable "passiveport3mask" { type = string }
-variable "port1gateway" { type = string }
-variable "port2gateway" { type = string }
 variable "forti_as_num" { type = string }
 variable "license" {
   type    = string

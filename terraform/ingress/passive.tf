@@ -45,15 +45,16 @@ resource "azurerm_virtual_machine" "passivefgtvm" {
     custom_data = templatefile("${path.module}/config-passive.conf", {
       type            = var.firewall_image
       license_file    = var.license2
-      port1_ip        = var.passiveport1
-      port1_mask      = var.passiveport1mask
-      port2_ip        = var.passiveport2
-      port2_mask      = var.passiveport2mask
-      port3_ip        = var.passiveport3
-      port3_mask      = var.passiveport3mask
-      active_peerip   = var.activeport1
-      mgmt_gateway_ip = var.port1gateway
-      defaultgwy      = var.port2gateway
+      port1_ip        = cidrhost(var.subnet_prefixes[3],5)
+      port1_mask      = cidrnetmask(var.subnet_prefixes[3])
+      port2_ip        = cidrhost(var.subnet_prefixes[4],5)
+      port2_mask      = cidrnetmask(var.subnet_prefixes[4])
+      port3_ip        = cidrhost(var.subnet_prefixes[5],5)
+      port3_mask      = cidrnetmask(var.subnet_prefixes[5])
+      active_peerip  = cidrhost(var.subnet_prefixes[3],4)
+      mgmt_gateway_ip = cidrhost(var.subnet_prefixes[3],1)
+      defaultgwy      = cidrhost(var.subnet_prefixes[4],1)
+      rfc1918gwy      = cidrhost(var.subnet_prefixes[5],1)
       adminsport      = var.adminsport
     })
   }

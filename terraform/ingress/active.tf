@@ -44,15 +44,16 @@ resource "azurerm_virtual_machine" "activefgtvm" {
     custom_data = templatefile("${path.module}/config-active.conf", {
       type            = var.firewall_image
       license_file    = var.license
-      port1_ip        = var.activeport1
-      port1_mask      = var.activeport1mask
-      port2_ip        = var.activeport2
-      port2_mask      = var.activeport2mask
-      port3_ip        = var.activeport3
-      port3_mask      = var.activeport3mask
-      passive_peerip  = var.passiveport1
-      mgmt_gateway_ip = var.port1gateway
-      defaultgwy      = var.port2gateway
+      port1_ip        = cidrhost(var.subnet_prefixes[3],4)
+      port1_mask      = cidrnetmask(var.subnet_prefixes[3])
+      port2_ip        = cidrhost(var.subnet_prefixes[4],4)
+      port2_mask      = cidrnetmask(var.subnet_prefixes[4])
+      port3_ip        = cidrhost(var.subnet_prefixes[5],4)
+      port3_mask      = cidrnetmask(var.subnet_prefixes[5])
+      passive_peerip  = cidrhost(var.subnet_prefixes[3],5)
+      mgmt_gateway_ip = cidrhost(var.subnet_prefixes[3],1)
+      defaultgwy      = cidrhost(var.subnet_prefixes[4],1)
+      rfc1918gwy      = cidrhost(var.subnet_prefixes[5],1)
       adminsport      = var.adminsport
     })
   }

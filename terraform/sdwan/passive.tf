@@ -9,8 +9,8 @@ resource "azurerm_virtual_machine" "passivefgtvm" {
   zones                        = [var.zone2]
 
   storage_image_reference {
-    publisher =  var.publisher
-    offer     =  var.fgtoffer
+    publisher = var.publisher
+    offer     = var.fgtoffer
     sku       = var.firewall_image == "byol" ? var.fgtsku["byol"] : var.fgtsku["payg"]
     version   = var.firewall_image_version
     id        = null
@@ -42,27 +42,33 @@ resource "azurerm_virtual_machine" "passivefgtvm" {
     computer_name  = var.firewall_name[0]
     admin_username = data.azurerm_key_vault_secret.secret-firewall-username.value
     admin_password = data.azurerm_key_vault_secret.secret-firewall-password.value
-    custom_data    = templatefile("${path.module}/config-passive.conf", {
-    type            = var.firewall_image
-    license_file    = var.license2
-    port1_ip        = var.passiveport1
-    port1_mask      = var.passiveport1mask
-    port2_ip        = var.passiveport2
-    port2_mask      = var.passiveport2mask
-    port3_ip        = var.passiveport3
-    port3_mask      = var.passiveport3mask
-    active_peerip   = var.activeport1
-    mgmt_gateway_ip = var.port1gateway
-    defaultgwy      = var.port2gateway
-    tenant          = var.tenant_id
-    subscription    = var.subscription_id
-    clientid        = var.client_id
-    clientsecret    = data.azurerm_key_vault_secret.secret-forti_client_secret.value
-    adminsport      = var.adminsport
-    rsg             = data.azurerm_resource_group.resource-group.name
-    clusterip       = azurerm_public_ip.ClusterPublicIP.name
-    routename       = azurerm_route_table.internal.name
-  })
+    custom_data = templatefile("${path.module}/config-passive.conf", {
+      type               = var.firewall_image
+      license_file       = var.license2
+      port1_ip        = cidrhost(var.subnet_prefixes[0],5)
+      port1_mask      = cidrnetmask(var.subnet_prefixes[0])
+      port2_ip        = cidrhost(var.subnet_prefixes[1],5)
+      port2_mask      = cidrnetmask(var.subnet_prefixes[1])
+      port3_ip        = cidrhost(var.subnet_prefixes[2],5)
+      port3_mask      = cidrnetmask(var.subnet_prefixes[2])
+      active_peerip  = cidrhost(var.subnet_prefixes[0],4)
+      mgmt_gateway_ip = cidrhost(var.subnet_prefixes[0],1)
+      defaultgwy      = cidrhost(var.subnet_prefixes[1],1)
+      rfc1918gwy      = cidrhost(var.subnet_prefixes[2],1)
+      tenant             = var.tenant_id
+      subscription       = var.subscription_id
+      clientid           = var.client_id
+      clientsecret       = data.azurerm_key_vault_secret.secret-forti_client_secret.value
+      adminsport         = var.adminsport
+      rsg                = data.azurerm_resource_group.resource-group.name
+      clusterip          = azurerm_public_ip.ClusterPublicIP.name
+      routename          = azurerm_route_table.internal.name
+      forti_as_num       = var.firewall_as_num
+      forti_router_id    = var.firewall_passive_router_id
+      transit_gateway_as = data.aviatrix_transit_gateway.transit_gateway.local_as_number
+      transit_gateway    = data.aviatrix_transit_gateway.transit_gateway.bgp_lan_ip_list[1]
+      transit_gateway_ha = data.aviatrix_transit_gateway.transit_gateway.ha_bgp_lan_ip_list[1]
+    })
   }
 
   os_profile_linux_config {
