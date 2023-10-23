@@ -5,7 +5,7 @@ resource "azurerm_virtual_machine" "passivefgtvm" {
   resource_group_name          = data.azurerm_resource_group.resource-group.name
   network_interface_ids        = [azurerm_network_interface.passiveport1.id, azurerm_network_interface.passiveport2.id, azurerm_network_interface.passiveport3.id]
   primary_network_interface_id = azurerm_network_interface.passiveport1.id
-  vm_size                      = var.fw_instance_size
+  vm_size                      = var.firewall_instance_size
   zones                        = [var.zone2]
 
   storage_image_reference {
@@ -55,6 +55,8 @@ resource "azurerm_virtual_machine" "passivefgtvm" {
       mgmt_gateway_ip = cidrhost(var.subnet_prefixes[0],1)
       defaultgwy      = cidrhost(var.subnet_prefixes[1],1)
       rfc1918gwy      = cidrhost(var.subnet_prefixes[2],1)
+      transit_gateway_prefix = cidrhost(element(data.azurerm_virtual_network.remote_virtual_network.address_space,0),0)
+      transit_gateway_lenght = cidrnetmask(element(data.azurerm_virtual_network.remote_virtual_network.address_space,0))
       tenant             = var.tenant_id
       subscription       = var.subscription_id
       clientid           = var.client_id

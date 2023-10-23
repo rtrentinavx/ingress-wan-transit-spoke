@@ -17,7 +17,7 @@ variable "subnet_prefixes" { type = list(string) }
 variable "tags" { type = map(string) }
 variable "transit_gateway" { type = string }
 variable "firewall_name" { type = list(string) }
-variable "fw_instance_size" { type = string }
+variable "firewall_instance_size" { type = string }
 variable "firewall_image_version" { type = string }
 variable "zone1" {
   type    = string

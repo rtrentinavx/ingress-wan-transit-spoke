@@ -49,7 +49,7 @@ resource "azurerm_application_gateway" "appgw" {
 
   backend_address_pool {
     name         = "pool-${var.appgw_name}"
-    ip_addresses = ["${cidrhost(var.subnet_prefixes["4"],4)}", "${cidrhost(var.subnet_prefixes["4"],5)}"]
+    ip_addresses = ["${cidrhost(var.subnet_prefixes["4"], 4)}", "${cidrhost(var.subnet_prefixes["4"], 5)}"]
   }
 
   probe {
@@ -101,22 +101,25 @@ resource "azurerm_route_table" "internal" {
   name                = "InternalRouteTable1"
   location            = data.azurerm_resource_group.resource-group.location
   resource_group_name = data.azurerm_resource_group.resource-group.name
+  tags                = var.tags
 }
 
-resource "azurerm_route" "default" {
-  name                   = "default"
-  resource_group_name    = data.azurerm_resource_group.resource-group.name
-  route_table_name       = azurerm_route_table.internal.name
-  address_prefix         = "0.0.0.0/0"
-  next_hop_type          = "VirtualAppliance"
-  next_hop_in_ip_address = cidrhost(var.subnet_prefixes[5],4)
-}
+# resource "azurerm_route" "default" {
+#   depends_on             = [azurerm_virtual_machine.passivefgtvm]
+#   name                   = "default"
+#   resource_group_name    = data.azurerm_resource_group.resource-group.name
+#   route_table_name       = azurerm_route_table.internal.name
+#   address_prefix         = "0.0.0.0/0"
+#   next_hop_type          = "VirtualAppliance"
+#   next_hop_in_ip_address = cidrhost(var.subnet_prefixes[2],4)
+# }
 
 resource "azurerm_subnet_route_table_association" "internalassociate" {
   depends_on     = [azurerm_route_table.internal]
   subnet_id      = module.vnet.vnet_subnets_name_id["privatesubnet"]
   route_table_id = azurerm_route_table.internal.id
 }
+
 resource "azurerm_network_security_group" "publicnetworknsg" {
   name                = "PublicNetworkSecurityGroup"
   location            = data.azurerm_resource_group.resource-group.location
@@ -193,7 +196,7 @@ resource "azurerm_network_interface" "activeport1" {
     name                          = "ipconfig1"
     subnet_id                     = module.vnet.vnet_subnets_name_id["mgmtsubnet"]
     private_ip_address_allocation = "Static"
-    private_ip_address            = cidrhost(var.subnet_prefixes[3],4)
+    private_ip_address            = cidrhost(var.subnet_prefixes[3], 4)
     primary                       = true
   }
   tags = var.tags
@@ -210,7 +213,7 @@ resource "azurerm_network_interface" "activeport2" {
     name                          = "ipconfig1"
     subnet_id                     = module.vnet.vnet_subnets_name_id["publicsubnet"]
     private_ip_address_allocation = "Static"
-    private_ip_address            = cidrhost(var.subnet_prefixes[4],4)
+    private_ip_address            = cidrhost(var.subnet_prefixes[4], 4)
   }
   tags = var.tags
 }
@@ -226,7 +229,7 @@ resource "azurerm_network_interface" "activeport3" {
     name                          = "ipconfig1"
     subnet_id                     = module.vnet.vnet_subnets_name_id["privatesubnet"]
     private_ip_address_allocation = "Static"
-    private_ip_address            = cidrhost(var.subnet_prefixes[5],4)
+    private_ip_address            = cidrhost(var.subnet_prefixes[5], 4)
   }
   tags = var.tags
 }
@@ -259,7 +262,7 @@ resource "azurerm_network_interface" "passiveport1" {
     name                          = "ipconfig1"
     subnet_id                     = module.vnet.vnet_subnets_name_id["mgmtsubnet"]
     private_ip_address_allocation = "Static"
-    private_ip_address            = cidrhost(var.subnet_prefixes[3],5)
+    private_ip_address            = cidrhost(var.subnet_prefixes[3], 5)
     primary                       = true
   }
   tags = var.tags
@@ -276,7 +279,7 @@ resource "azurerm_network_interface" "passiveport2" {
     name                          = "ipconfig1"
     subnet_id                     = module.vnet.vnet_subnets_name_id["publicsubnet"]
     private_ip_address_allocation = "Static"
-    private_ip_address            = cidrhost(var.subnet_prefixes[4],5)
+    private_ip_address            = cidrhost(var.subnet_prefixes[4], 5)
   }
   tags = var.tags
 }
@@ -292,7 +295,7 @@ resource "azurerm_network_interface" "passiveport3" {
     name                          = "ipconfig1"
     subnet_id                     = module.vnet.vnet_subnets_name_id["privatesubnet"]
     private_ip_address_allocation = "Static"
-    private_ip_address            = cidrhost(var.subnet_prefixes[5],5)
+    private_ip_address            = cidrhost(var.subnet_prefixes[5], 5)
   }
   tags = var.tags
 }

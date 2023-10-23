@@ -25,7 +25,7 @@ variable "probe-interval" { type = number }
 variable "tags" { type = map(string) }
 variable "transit_gateway" { type = string }
 variable "firewall_name" { type = list(string) }
-variable "fw_instance_size" { type = string }
+variable "firewall_instance_size" { type = string }
 variable "firewall_image_version" { type = string }
 variable "zone1" {
   type    = string
@@ -56,7 +56,6 @@ variable "adminsport" {
   type    = string
   default = "8443"
 }
-variable "forti_as_num" { type = string }
 variable "license" {
   type    = string
   default = "license.txt"
