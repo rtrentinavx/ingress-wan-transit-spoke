@@ -292,7 +292,7 @@ resource "azurerm_network_interface" "passiveport3" {
     name                          = "ipconfig1"
     subnet_id                     = module.vnet.vnet_subnets_name_id["privatesubnet"]
     private_ip_address_allocation = "Static"
-    private_ip_address            = cidrhost(var.subnet_prefixes[5],4)
+    private_ip_address            = cidrhost(var.subnet_prefixes[5],5)
   }
   tags = var.tags
 }
