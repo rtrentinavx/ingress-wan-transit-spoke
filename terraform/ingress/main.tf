@@ -97,32 +97,6 @@ resource "azurerm_application_gateway" "appgw" {
   }
 }
 
-resource "azurerm_route_table" "route_table_privatesubnet1" {
-  name                = "InternalRouteTable-${var.subnet_names[5]}"
-  location            = data.azurerm_resource_group.resource-group.location
-  resource_group_name = data.azurerm_resource_group.resource-group.name
-  tags                = var.tags
-}
-
-resource "azurerm_route_table" "route_table_privatesubnet2" {
-  name                = "InternalRouteTable-${var.subnet_names[6]}"
-  location            = data.azurerm_resource_group.resource-group.location
-  resource_group_name = data.azurerm_resource_group.resource-group.name
-  tags                = var.tags
-}
-
-resource "azurerm_subnet_route_table_association" "route_table_privatesubnet1-association" {
-  depends_on     = [azurerm_route_table.route_table_privatesubnet1]
-  subnet_id      = module.vnet.vnet_subnets_name_id["privatesubnet"]
-  route_table_id = azurerm_route_table.route_table_privatesubnet1.id
-}
-
-resource "azurerm_subnet_route_table_association" "route_table_privatesubnet2-association" {
-  depends_on     = [azurerm_route_table.route_table_privatesubnet2]
-  subnet_id      = module.vnet.vnet_subnets_name_id["privatesubnet2"]
-  route_table_id = azurerm_route_table.route_table_privatesubnet2.id
-}
-
 resource "azurerm_network_security_group" "publicnetworknsg" {
   name                = "PublicNetworkSecurityGroup"
   location            = data.azurerm_resource_group.resource-group.location
@@ -344,8 +318,7 @@ module "regions" {
 }
 
 module "mc-spoke" {
-  depends_on = [ azurerm_subnet_route_table_association.route_table_privatesubnet1-association, 
-  azurerm_subnet_route_table_association.route_table_privatesubnet2-association ]
+  depends_on = [ azurerm_virtual_machine.activefgtvm, azurerm_virtual_machine.passivefgtvm ]
   source                 = "terraform-aviatrix-modules/mc-spoke/aviatrix"
   version                = "1.6.5"
   cloud                  = "Azure"
