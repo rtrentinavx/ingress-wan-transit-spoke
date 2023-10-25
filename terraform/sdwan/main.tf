@@ -35,7 +35,7 @@ module "vnet" {
 # }
 
 resource "azurerm_public_ip" "ActiveMGMTIP" {
-  count = var.management == "public" ? 1 : 0 
+  count               = var.management == "public" ? 1 : 0
   name                = "ActiveMGMTIP"
   location            = data.azurerm_resource_group.resource-group.location
   resource_group_name = data.azurerm_resource_group.resource-group.name
@@ -46,7 +46,7 @@ resource "azurerm_public_ip" "ActiveMGMTIP" {
 }
 
 resource "azurerm_public_ip" "PassiveMGMTIP" {
-  count = var.management == "public" ? 1 : 0 
+  count               = var.management == "public" ? 1 : 0
   name                = "PassiveMGMTIP"
   location            = data.azurerm_resource_group.resource-group.location
   resource_group_name = data.azurerm_resource_group.resource-group.name
@@ -150,7 +150,7 @@ resource "azurerm_network_interface" "activeport2" {
     subnet_id                     = module.vnet.vnet_subnets_name_id["publicsubnet"]
     private_ip_address_allocation = "Static"
     private_ip_address            = cidrhost(var.subnet_prefixes[1], 4)
-      }
+  }
   tags = var.tags
 }
 
