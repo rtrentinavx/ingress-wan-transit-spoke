@@ -11,41 +11,31 @@ module "vnet" {
   tags                = var.tags
 }
 
-resource "azurerm_route_table" "internal" {
-  name                = "InternalRouteTable1"
-  location            = data.azurerm_resource_group.resource-group.location
-  resource_group_name = data.azurerm_resource_group.resource-group.name
-  tags                = var.tags
-}
+# resource "azurerm_route_table" "internal" {
+#   name                = "InternalRouteTable1"
+#   location            = data.azurerm_resource_group.resource-group.location
+#   resource_group_name = data.azurerm_resource_group.resource-group.name
+#   tags                = var.tags
+# }
 
-resource "azurerm_route" "default" {
-  depends_on             = [azurerm_virtual_machine.passivefgtvm]
-  name                   = "default"
-  resource_group_name    = data.azurerm_resource_group.resource-group.name
-  route_table_name       = azurerm_route_table.internal.name
-  address_prefix         = "0.0.0.0/0"
-  next_hop_type          = "VirtualAppliance"
-  next_hop_in_ip_address = cidrhost(var.subnet_prefixes[2], 4)
-}
+# resource "azurerm_route" "default" {
+#   depends_on             = [azurerm_virtual_machine.passivefgtvm]
+#   name                   = "default"
+#   resource_group_name    = data.azurerm_resource_group.resource-group.name
+#   route_table_name       = azurerm_route_table.internal.name
+#   address_prefix         = "0.0.0.0/0"
+#   next_hop_type          = "VirtualAppliance"
+#   next_hop_in_ip_address = cidrhost(var.subnet_prefixes[2], 4)
+# }
 
-resource "azurerm_subnet_route_table_association" "internalassociate" {
-  depends_on     = [azurerm_route_table.internal]
-  subnet_id      = module.vnet.vnet_subnets_name_id["privatesubnet"]
-  route_table_id = azurerm_route_table.internal.id
-}
-
-resource "azurerm_public_ip" "ClusterPublicIP" {
-  name                = "ClusterPublicIP"
-  location            = data.azurerm_resource_group.resource-group.location
-  resource_group_name = data.azurerm_resource_group.resource-group.name
-  allocation_method   = "Static"
-  sku                 = "Standard"
-  sku_tier            = "Regional"
-  tags                = var.tags
-
-}
+# resource "azurerm_subnet_route_table_association" "internalassociate" {
+#   depends_on     = [azurerm_route_table.internal]
+#   subnet_id      = module.vnet.vnet_subnets_name_id["privatesubnet"]
+#   route_table_id = azurerm_route_table.internal.id
+# }
 
 resource "azurerm_public_ip" "ActiveMGMTIP" {
+  count = var.management == "public" ? 1 : 0 
   name                = "ActiveMGMTIP"
   location            = data.azurerm_resource_group.resource-group.location
   resource_group_name = data.azurerm_resource_group.resource-group.name
@@ -56,6 +46,7 @@ resource "azurerm_public_ip" "ActiveMGMTIP" {
 }
 
 resource "azurerm_public_ip" "PassiveMGMTIP" {
+  count = var.management == "public" ? 1 : 0 
   name                = "PassiveMGMTIP"
   location            = data.azurerm_resource_group.resource-group.location
   resource_group_name = data.azurerm_resource_group.resource-group.name
@@ -102,7 +93,6 @@ resource "azurerm_network_security_group" "privatenetworknsg" {
   }
   tags = var.tags
 }
-
 resource "azurerm_network_security_rule" "outgoing_public" {
   name                        = "egress"
   priority                    = 100
@@ -139,11 +129,11 @@ resource "azurerm_network_interface" "activeport1" {
 
   ip_configuration {
     name                          = "ipconfig1"
-    subnet_id                     = module.vnet.vnet_subnets_name_id["hamgmtsubnet"]
+    subnet_id                     = module.vnet.vnet_subnets_name_id["mgmtsubnet"]
     private_ip_address_allocation = "Static"
     private_ip_address            = cidrhost(var.subnet_prefixes[0], 4)
     primary                       = true
-    public_ip_address_id          = azurerm_public_ip.ActiveMGMTIP.id
+    public_ip_address_id          = var.management == "public" ? azurerm_public_ip.ActiveMGMTIP[0].id : null
   }
   tags = var.tags
 }
@@ -160,8 +150,7 @@ resource "azurerm_network_interface" "activeport2" {
     subnet_id                     = module.vnet.vnet_subnets_name_id["publicsubnet"]
     private_ip_address_allocation = "Static"
     private_ip_address            = cidrhost(var.subnet_prefixes[1], 4)
-    public_ip_address_id          = azurerm_public_ip.ClusterPublicIP.id
-  }
+      }
   tags = var.tags
 }
 
@@ -207,11 +196,11 @@ resource "azurerm_network_interface" "passiveport1" {
 
   ip_configuration {
     name                          = "ipconfig1"
-    subnet_id                     = module.vnet.vnet_subnets_name_id["hamgmtsubnet"]
+    subnet_id                     = module.vnet.vnet_subnets_name_id["mgmtsubnet"]
     private_ip_address_allocation = "Static"
     private_ip_address            = cidrhost(var.subnet_prefixes[0], 5)
     primary                       = true
-    public_ip_address_id          = azurerm_public_ip.PassiveMGMTIP.id
+    public_ip_address_id          = var.management == "public" ? azurerm_public_ip.PassiveMGMTIP[0].id : null
   }
   tags = var.tags
 }
@@ -248,7 +237,6 @@ resource "azurerm_network_interface" "passiveport3" {
   tags = var.tags
 }
 
-# Connect the security group to the network interfaces
 resource "azurerm_network_interface_security_group_association" "passiveport1nsg" {
   depends_on                = [azurerm_network_interface.passiveport1]
   network_interface_id      = azurerm_network_interface.passiveport1.id

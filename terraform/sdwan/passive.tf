@@ -59,14 +59,7 @@ resource "azurerm_virtual_machine" "passivefgtvm" {
       rfc1918gwy             = cidrhost(var.subnet_prefixes[2], 1)
       transit_gateway_prefix = cidrhost(element(data.azurerm_virtual_network.remote_virtual_network.address_space, 0), 0)
       transit_gateway_lenght = cidrnetmask(element(data.azurerm_virtual_network.remote_virtual_network.address_space, 0))
-      tenant                 = var.tenant_id
-      subscription           = var.subscription_id
-      clientid               = var.client_id
-      clientsecret           = data.azurerm_key_vault_secret.secret-forti_client_secret.value
       adminsport             = var.adminsport
-      rsg                    = data.azurerm_resource_group.resource-group.name
-      clusterip              = azurerm_public_ip.ClusterPublicIP.name
-      routename              = azurerm_route_table.internal.name
       forti_as_num           = var.firewall_as_num
       forti_router_id        = var.firewall_passive_router_id
       transit_gateway_as     = data.aviatrix_transit_gateway.transit_gateway.local_as_number

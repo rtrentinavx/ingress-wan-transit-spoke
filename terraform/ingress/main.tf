@@ -11,90 +11,26 @@ module "vnet" {
   tags                = var.tags
 }
 
-resource "azurerm_public_ip" "pip-appgw" {
-  name                = "pip-${var.appgw_name}"
-  resource_group_name = data.azurerm_resource_group.resource-group.name
+resource "azurerm_public_ip" "ActiveMGMTIP" {
+  count = var.management == "public" ? 1 : 0 
+  name                = "ActiveMGMTIP"
   location            = data.azurerm_resource_group.resource-group.location
+  resource_group_name = data.azurerm_resource_group.resource-group.name
   allocation_method   = "Static"
   sku                 = "Standard"
   sku_tier            = "Regional"
   tags                = var.tags
 }
 
-resource "azurerm_application_gateway" "appgw" {
-  name                = var.appgw_name
-  resource_group_name = data.azurerm_resource_group.resource-group.name
+resource "azurerm_public_ip" "PassiveMGMTIP" {
+  count = var.management == "public" ? 1 : 0 
+  name                = "PassiveMGMTIP"
   location            = data.azurerm_resource_group.resource-group.location
-
-  sku {
-    name     = var.appgw_sku
-    tier     = var.appgw_sku
-    capacity = 2
-  }
-
-  gateway_ip_configuration {
-    name      = "ip-config-${var.appgw_name}"
-    subnet_id = module.vnet.vnet_subnets_name_id["frontend"]
-  }
-
-  frontend_port {
-    name = "fe-port-${var.appgw_name}"
-    port = var.fe-port
-  }
-
-  frontend_ip_configuration {
-    name                 = "feip-${var.appgw_name}"
-    public_ip_address_id = azurerm_public_ip.pip-appgw.id
-  }
-
-  backend_address_pool {
-    name         = "pool-${var.appgw_name}"
-    ip_addresses = ["${cidrhost(var.subnet_prefixes["4"], 4)}", "${cidrhost(var.subnet_prefixes["4"], 5)}"]
-  }
-
-  probe {
-    name                                      = "probe-${var.appgw_name}"
-    interval                                  = var.probe-interval
-    timeout                                   = (3 * var.probe-interval)
-    protocol                                  = var.be-protocol
-    port                                      = var.be-port
-    path                                      = var.be-path
-    unhealthy_threshold                       = 3
-    pick_host_name_from_backend_http_settings = true
-  }
-
-  backend_http_settings {
-    name                                = "be-${var.appgw_name}"
-    cookie_based_affinity               = "Disabled"
-    path                                = var.be-path
-    port                                = var.be-port
-    protocol                            = var.be-protocol
-    request_timeout                     = 60
-    probe_name                          = "probe-${var.appgw_name}"
-    pick_host_name_from_backend_address = true
-  }
-
-  # ssl_certificate {
-  #   name                = "cert-${var.appgw_name}"
-  #   key_vault_secret_id = data.azurerm_key_vault_secret.secret-appgw-cert.value
-  # }
-
-  http_listener {
-    name                           = "listener-${var.appgw_name}"
-    frontend_ip_configuration_name = "feip-${var.appgw_name}"
-    frontend_port_name             = "fe-port-${var.appgw_name}"
-    protocol                       = var.fe-protocol
-    # ssl_certificate_name           = "cert-${var.appgw_name}"
-  }
-
-  request_routing_rule {
-    name                       = "rule-${var.appgw_name}"
-    priority                   = 10
-    rule_type                  = "Basic"
-    http_listener_name         = "listener-${var.appgw_name}"
-    backend_address_pool_name  = "pool-${var.appgw_name}"
-    backend_http_settings_name = "be-${var.appgw_name}"
-  }
+  resource_group_name = data.azurerm_resource_group.resource-group.name
+  allocation_method   = "Static"
+  sku                 = "Standard"
+  sku_tier            = "Regional"
+  tags                = var.tags
 }
 
 resource "azurerm_network_security_group" "publicnetworknsg" {
@@ -175,6 +111,7 @@ resource "azurerm_network_interface" "activeport1" {
     private_ip_address_allocation = "Static"
     private_ip_address            = cidrhost(var.subnet_prefixes[3], 4)
     primary                       = true
+    public_ip_address_id          = var.management == "public" ? azurerm_public_ip.ActiveMGMTIP[0].id : null
   }
   tags = var.tags
 }
@@ -204,7 +141,7 @@ resource "azurerm_network_interface" "activeport3" {
 
   ip_configuration {
     name                          = "ipconfig1"
-    subnet_id                     = module.vnet.vnet_subnets_name_id["privatesubnet"]
+    subnet_id                     = module.vnet.vnet_subnets_name_id["privatesubnet-active"]
     private_ip_address_allocation = "Static"
     private_ip_address            = cidrhost(var.subnet_prefixes[5], 4)
   }
@@ -241,6 +178,7 @@ resource "azurerm_network_interface" "passiveport1" {
     private_ip_address_allocation = "Static"
     private_ip_address            = cidrhost(var.subnet_prefixes[3], 5)
     primary                       = true
+    public_ip_address_id          = var.management == "public" ? azurerm_public_ip.PassiveMGMTIP[0].id : null
   }
   tags = var.tags
 }
@@ -270,7 +208,7 @@ resource "azurerm_network_interface" "passiveport3" {
 
   ip_configuration {
     name                          = "ipconfig1"
-    subnet_id                     = module.vnet.vnet_subnets_name_id["privatesubnet"]
+    subnet_id                     = module.vnet.vnet_subnets_name_id["privatesubnet-passive"]
     private_ip_address_allocation = "Static"
     private_ip_address            = cidrhost(var.subnet_prefixes[6], 5)
   }
@@ -318,7 +256,7 @@ module "regions" {
 }
 
 module "mc-spoke" {
-  depends_on = [ azurerm_virtual_machine.activefgtvm, azurerm_virtual_machine.passivefgtvm ]
+  depends_on             = [azurerm_virtual_machine.activefgtvm, azurerm_virtual_machine.passivefgtvm]
   source                 = "terraform-aviatrix-modules/mc-spoke/aviatrix"
   version                = "1.6.5"
   cloud                  = "Azure"

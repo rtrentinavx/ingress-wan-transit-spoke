@@ -1,13 +1,13 @@
 resource "azurerm_virtual_machine" "passivefgtvm" {
-  depends_on                   = [azurerm_virtual_machine.activefgtvm]
-  name                         = var.firewall_name[1]
-  location                     = var.location
-  resource_group_name          = data.azurerm_resource_group.resource-group.name
-  network_interface_ids        = [azurerm_network_interface.passiveport1.id, azurerm_network_interface.passiveport2.id, azurerm_network_interface.passiveport3.id]
-  primary_network_interface_id = azurerm_network_interface.passiveport1.id
-  vm_size                      = var.firewall_instance_size
-  zones                        = [var.zone2]
-    delete_os_disk_on_termination = true
+  depends_on                       = [azurerm_virtual_machine.activefgtvm]
+  name                             = var.firewall_name[1]
+  location                         = var.location
+  resource_group_name              = data.azurerm_resource_group.resource-group.name
+  network_interface_ids            = [azurerm_network_interface.passiveport1.id, azurerm_network_interface.passiveport2.id, azurerm_network_interface.passiveport3.id]
+  primary_network_interface_id     = azurerm_network_interface.passiveport1.id
+  vm_size                          = var.firewall_instance_size
+  zones                            = [var.zone2]
+  delete_os_disk_on_termination    = true
   delete_data_disks_on_termination = true
 
   storage_image_reference {
@@ -53,7 +53,6 @@ resource "azurerm_virtual_machine" "passivefgtvm" {
       port2_mask      = cidrnetmask(var.subnet_prefixes[4])
       port3_ip        = cidrhost(var.subnet_prefixes[6], 5)
       port3_mask      = cidrnetmask(var.subnet_prefixes[6])
-      active_peerip   = cidrhost(var.subnet_prefixes[3], 4)
       mgmt_gateway_ip = cidrhost(var.subnet_prefixes[3], 1)
       defaultgwy      = cidrhost(var.subnet_prefixes[4], 1)
       rfc1918gwy      = cidrhost(var.subnet_prefixes[6], 1)
