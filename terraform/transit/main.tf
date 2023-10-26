@@ -12,6 +12,7 @@ module "mc-transit" {
   cloud                         = "Azure"
   cidr                          = var.address_space
   connected_transit             = true
+  enable_advertise_transit_cidr = true 
   enable_bgp_over_lan           = true
   enable_egress_transit_firenet = true
   enable_transit_firenet        = true
