@@ -1,7 +1,8 @@
 terraform {
   required_providers {
     azurerm = {
-      source = "hashicorp/azurerm"
+      source  = "hashicorp/azurerm"
+      version = ">= 3.11.0, < 4.0.0"
     }
     aviatrix = {
       source  = "AviatrixSystems/aviatrix"
@@ -12,7 +13,7 @@ terraform {
     resource_group_name  = "syneos-backend-storage-rg"
     storage_account_name = "storagesyneostfstate"
     container_name       = "state"
-    key                  = "terraform.tfstate.ingress"
+    key                  = "terraform.tfstate.spoke-254"
   }
 }
 

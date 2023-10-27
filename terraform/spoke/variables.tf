@@ -20,3 +20,4 @@ variable "enable_max_performance" { type = bool }
 variable "insane_mode" { type = bool }
 variable "gw_name" { type = string }
 variable "instance_size" { type = string }
+variable "greenfield" { type = bool }

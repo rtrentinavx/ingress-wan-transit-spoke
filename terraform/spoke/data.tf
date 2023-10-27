@@ -31,3 +31,9 @@ data "azurerm_key_vault_secret" "secret-avx-admin-password" {
   name         = "avx-admin-password"
   key_vault_id = data.azurerm_key_vault.keyvault.id
 }
+
+data "azurerm_virtual_network" "virtual_network" {
+  count               = var.greenfield == true ? 0 : 1
+  name                = var.virtual_network_name
+  resource_group_name = var.resource_group
+}
