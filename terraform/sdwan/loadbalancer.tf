@@ -3,6 +3,7 @@ module "loadbalancer-external" {
   source                 = "Azure/loadbalancer/azurerm"
   version                = "4.4.0"
   type                   = "public"
+  disable_outbound_snat = true 
   frontend_name          = "sdwan-external-lb-${data.azurerm_resource_group.resource-group.location}"
   resource_group_name    = data.azurerm_resource_group.resource-group.name
   location               = data.azurerm_resource_group.resource-group.location
@@ -34,13 +35,15 @@ module "loadbalancer-internal" {
   source                 = "Azure/loadbalancer/azurerm"
   version                = "4.4.0"
   type                   = "private"
+  disable_outbound_snat = true 
   frontend_subnet_id     = module.vnet.vnet_subnets_name_id["privatesubnet"]
   frontend_name          = "sdwan-internal-lb-${data.azurerm_resource_group.resource-group.location}"
+  frontend_private_ip_address_allocation = "Static"
   frontend_private_ip_address = cidrhost(var.subnet_prefixes[1], 6)
   resource_group_name    = data.azurerm_resource_group.resource-group.name
   location               = data.azurerm_resource_group.resource-group.location
   lb_floating_ip_enabled = true
-  lb_port                = { all = ["0", "All", "0"] }
+  lb_port                = { haport = ["0", "All", "0"] }
   lb_probe               = var.lb_probe
   lb_sku                 = "Standard"
   pip_sku                = "Standard"
