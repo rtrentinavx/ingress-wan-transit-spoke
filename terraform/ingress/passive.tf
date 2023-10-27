@@ -3,7 +3,7 @@ resource "azurerm_virtual_machine" "passivefgtvm" {
   name                             = var.firewall_name[1]
   location                         = var.location
   resource_group_name              = data.azurerm_resource_group.resource-group.name
-  network_interface_ids            = [azurerm_network_interface.passiveport1.id, azurerm_network_interface.passiveport2.id, azurerm_network_interface.passiveport3.id]
+  network_interface_ids            = [azurerm_network_interface.passiveport1.id, azurerm_network_interface.passiveport2.id]
   primary_network_interface_id     = azurerm_network_interface.passiveport1.id
   vm_size                          = var.firewall_instance_size
   zones                            = [var.zone2]
@@ -45,18 +45,16 @@ resource "azurerm_virtual_machine" "passivefgtvm" {
     admin_username = data.azurerm_key_vault_secret.secret-firewall-username.value
     admin_password = data.azurerm_key_vault_secret.secret-firewall-password.value
     custom_data = templatefile("${path.module}/config-passive.conf", {
-      type            = var.firewall_image
-      license_file    = var.license2
-      port1_ip        = cidrhost(var.subnet_prefixes[3], 5)
-      port1_mask      = cidrnetmask(var.subnet_prefixes[3])
-      port2_ip        = cidrhost(var.subnet_prefixes[4], 5)
-      port2_mask      = cidrnetmask(var.subnet_prefixes[4])
-      port3_ip        = cidrhost(var.subnet_prefixes[6], 5)
-      port3_mask      = cidrnetmask(var.subnet_prefixes[6])
-      mgmt_gateway_ip = cidrhost(var.subnet_prefixes[3], 1)
-      defaultgwy      = cidrhost(var.subnet_prefixes[4], 1)
-      rfc1918gwy      = cidrhost(var.subnet_prefixes[6], 1)
-      adminsport      = var.adminsport
+      type          = var.firewall_image
+      license_file  = var.license2
+      firewall_name = var.firewall_name[1]
+      port1_ip      = cidrhost(var.subnet_prefixes[3], 5)
+      port1_mask    = cidrnetmask(var.subnet_prefixes[3])
+      port2_ip      = cidrhost(var.subnet_prefixes[5], 5)
+      port2_mask    = cidrnetmask(var.subnet_prefixes[5])
+      defaultgwy    = cidrhost(var.subnet_prefixes[3], 1)
+      rfc1918gwy    = cidrhost(var.subnet_prefixes[5], 1)
+      adminsport    = var.adminsport
     })
   }
 

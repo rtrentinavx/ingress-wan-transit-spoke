@@ -126,14 +126,16 @@ resource "azurerm_network_interface" "activeport1" {
   location                      = data.azurerm_resource_group.resource-group.location
   resource_group_name           = data.azurerm_resource_group.resource-group.name
   enable_accelerated_networking = var.accelerate == "true" ? true : false
+  enable_ip_forwarding = true 
 
   ip_configuration {
     name                          = "ipconfig1"
-    subnet_id                     = module.vnet.vnet_subnets_name_id["mgmtsubnet"]
+    subnet_id                     = module.vnet.vnet_subnets_name_id["publicsubnet"]
     private_ip_address_allocation = "Static"
     private_ip_address            = cidrhost(var.subnet_prefixes[0], 4)
     primary                       = true
     public_ip_address_id          = var.management == "public" ? azurerm_public_ip.ActiveMGMTIP[0].id : null
+
   }
   tags = var.tags
 }
@@ -147,7 +149,7 @@ resource "azurerm_network_interface" "activeport2" {
 
   ip_configuration {
     name                          = "ipconfig1"
-    subnet_id                     = module.vnet.vnet_subnets_name_id["publicsubnet"]
+    subnet_id                     = module.vnet.vnet_subnets_name_id["privatesubnet"]
     private_ip_address_allocation = "Static"
     private_ip_address            = cidrhost(var.subnet_prefixes[1], 4)
   }
@@ -163,7 +165,7 @@ resource "azurerm_network_interface" "activeport3" {
 
   ip_configuration {
     name                          = "ipconfig1"
-    subnet_id                     = module.vnet.vnet_subnets_name_id["privatesubnet"]
+    subnet_id                     = module.vnet.vnet_subnets_name_id["hasubnet"]
     private_ip_address_allocation = "Static"
     private_ip_address            = cidrhost(var.subnet_prefixes[2], 4)
   }
@@ -193,10 +195,11 @@ resource "azurerm_network_interface" "passiveport1" {
   location                      = data.azurerm_resource_group.resource-group.location
   resource_group_name           = data.azurerm_resource_group.resource-group.name
   enable_accelerated_networking = var.accelerate == "true" ? true : false
+  enable_ip_forwarding = true 
 
   ip_configuration {
     name                          = "ipconfig1"
-    subnet_id                     = module.vnet.vnet_subnets_name_id["mgmtsubnet"]
+    subnet_id                     = module.vnet.vnet_subnets_name_id["publicsubnet"]
     private_ip_address_allocation = "Static"
     private_ip_address            = cidrhost(var.subnet_prefixes[0], 5)
     primary                       = true
@@ -214,7 +217,7 @@ resource "azurerm_network_interface" "passiveport2" {
 
   ip_configuration {
     name                          = "ipconfig1"
-    subnet_id                     = module.vnet.vnet_subnets_name_id["publicsubnet"]
+    subnet_id                     = module.vnet.vnet_subnets_name_id["privatesubnet"]
     private_ip_address_allocation = "Static"
     private_ip_address            = cidrhost(var.subnet_prefixes[1], 5)
   }
@@ -230,7 +233,7 @@ resource "azurerm_network_interface" "passiveport3" {
 
   ip_configuration {
     name                          = "ipconfig1"
-    subnet_id                     = module.vnet.vnet_subnets_name_id["privatesubnet"]
+    subnet_id                     = module.vnet.vnet_subnets_name_id["hasubnet"]
     private_ip_address_allocation = "Static"
     private_ip_address            = cidrhost(var.subnet_prefixes[2], 5)
   }
@@ -295,7 +298,7 @@ resource "aviatrix_transit_external_device_conn" "transit_1_to_forti" {
   depends_on                = [azurerm_virtual_network_peering.transit_1_to_sdwan, azurerm_virtual_network_peering.sdwan-to-transit_1]
   backup_bgp_remote_as_num  = var.firewall_as_num
   backup_local_lan_ip       = data.aviatrix_transit_gateway.transit_gateway.ha_bgp_lan_ip_list[1]
-  backup_remote_lan_ip      = cidrhost(var.subnet_prefixes[2], 5)
+  backup_remote_lan_ip      = cidrhost(var.subnet_prefixes[1], 5)
   bgp_local_as_num          = data.aviatrix_transit_gateway.transit_gateway.local_as_number
   bgp_remote_as_num         = var.firewall_as_num
   connection_type           = "bgp"
@@ -304,7 +307,7 @@ resource "aviatrix_transit_external_device_conn" "transit_1_to_forti" {
   gw_name                   = data.aviatrix_transit_gateway.transit_gateway.gw_name
   ha_enabled                = true
   local_lan_ip              = data.aviatrix_transit_gateway.transit_gateway.bgp_lan_ip_list[1]
-  remote_lan_ip             = cidrhost(var.subnet_prefixes[2], 4)
+  remote_lan_ip             = cidrhost(var.subnet_prefixes[1], 4)
   remote_vpc_name           = "${module.vnet.vnet_name}:${data.azurerm_resource_group.resource-group.name}:${split("/", module.vnet.vnet_id)[2]}"
   vpc_id                    = data.aviatrix_transit_gateway.transit_gateway.vpc_id
   tunnel_protocol           = "LAN"

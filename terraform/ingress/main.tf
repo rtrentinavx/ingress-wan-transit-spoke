@@ -12,7 +12,7 @@ module "vnet" {
 }
 
 resource "azurerm_public_ip" "ActiveMGMTIP" {
-  count = var.management == "public" ? 1 : 0 
+  count               = var.management == "public" ? 1 : 0
   name                = "ActiveMGMTIP"
   location            = data.azurerm_resource_group.resource-group.location
   resource_group_name = data.azurerm_resource_group.resource-group.name
@@ -23,7 +23,7 @@ resource "azurerm_public_ip" "ActiveMGMTIP" {
 }
 
 resource "azurerm_public_ip" "PassiveMGMTIP" {
-  count = var.management == "public" ? 1 : 0 
+  count               = var.management == "public" ? 1 : 0
   name                = "PassiveMGMTIP"
   location            = data.azurerm_resource_group.resource-group.location
   resource_group_name = data.azurerm_resource_group.resource-group.name
@@ -104,10 +104,11 @@ resource "azurerm_network_interface" "activeport1" {
   location                      = data.azurerm_resource_group.resource-group.location
   resource_group_name           = data.azurerm_resource_group.resource-group.name
   enable_accelerated_networking = var.accelerate == "true" ? true : false
+  enable_ip_forwarding = true 
 
   ip_configuration {
     name                          = "ipconfig1"
-    subnet_id                     = module.vnet.vnet_subnets_name_id["mgmtsubnet"]
+    subnet_id                     = module.vnet.vnet_subnets_name_id["publicsubnet"]
     private_ip_address_allocation = "Static"
     private_ip_address            = cidrhost(var.subnet_prefixes[3], 4)
     primary                       = true
@@ -125,28 +126,13 @@ resource "azurerm_network_interface" "activeport2" {
 
   ip_configuration {
     name                          = "ipconfig1"
-    subnet_id                     = module.vnet.vnet_subnets_name_id["publicsubnet"]
+    subnet_id                     = module.vnet.vnet_subnets_name_id["privatesubnet-active"]
     private_ip_address_allocation = "Static"
     private_ip_address            = cidrhost(var.subnet_prefixes[4], 4)
   }
   tags = var.tags
 }
 
-resource "azurerm_network_interface" "activeport3" {
-  name                          = "activeport3"
-  location                      = data.azurerm_resource_group.resource-group.location
-  resource_group_name           = data.azurerm_resource_group.resource-group.name
-  enable_ip_forwarding          = true
-  enable_accelerated_networking = var.accelerate == "true" ? true : false
-
-  ip_configuration {
-    name                          = "ipconfig1"
-    subnet_id                     = module.vnet.vnet_subnets_name_id["privatesubnet-active"]
-    private_ip_address_allocation = "Static"
-    private_ip_address            = cidrhost(var.subnet_prefixes[5], 4)
-  }
-  tags = var.tags
-}
 
 resource "azurerm_network_interface_security_group_association" "port1nsg" {
   depends_on                = [azurerm_network_interface.activeport1]
@@ -160,21 +146,16 @@ resource "azurerm_network_interface_security_group_association" "port2nsg" {
   network_security_group_id = azurerm_network_security_group.privatenetworknsg.id
 }
 
-resource "azurerm_network_interface_security_group_association" "port3nsg" {
-  depends_on                = [azurerm_network_interface.activeport3]
-  network_interface_id      = azurerm_network_interface.activeport3.id
-  network_security_group_id = azurerm_network_security_group.privatenetworknsg.id
-}
-
 resource "azurerm_network_interface" "passiveport1" {
   name                          = "passiveport1"
   location                      = data.azurerm_resource_group.resource-group.location
   resource_group_name           = data.azurerm_resource_group.resource-group.name
   enable_accelerated_networking = var.accelerate == "true" ? true : false
+  enable_ip_forwarding = true 
 
   ip_configuration {
     name                          = "ipconfig1"
-    subnet_id                     = module.vnet.vnet_subnets_name_id["mgmtsubnet"]
+    subnet_id                     = module.vnet.vnet_subnets_name_id["publicsubnet"]
     private_ip_address_allocation = "Static"
     private_ip_address            = cidrhost(var.subnet_prefixes[3], 5)
     primary                       = true
@@ -192,28 +173,13 @@ resource "azurerm_network_interface" "passiveport2" {
 
   ip_configuration {
     name                          = "ipconfig1"
-    subnet_id                     = module.vnet.vnet_subnets_name_id["publicsubnet"]
-    private_ip_address_allocation = "Static"
-    private_ip_address            = cidrhost(var.subnet_prefixes[4], 5)
-  }
-  tags = var.tags
-}
-
-resource "azurerm_network_interface" "passiveport3" {
-  name                          = "passiveport3"
-  location                      = data.azurerm_resource_group.resource-group.location
-  resource_group_name           = data.azurerm_resource_group.resource-group.name
-  enable_ip_forwarding          = true
-  enable_accelerated_networking = var.accelerate == "true" ? true : false
-
-  ip_configuration {
-    name                          = "ipconfig1"
     subnet_id                     = module.vnet.vnet_subnets_name_id["privatesubnet-passive"]
     private_ip_address_allocation = "Static"
-    private_ip_address            = cidrhost(var.subnet_prefixes[6], 5)
+    private_ip_address            = cidrhost(var.subnet_prefixes[5], 5)
   }
   tags = var.tags
 }
+
 
 resource "azurerm_network_interface_security_group_association" "passiveport1nsg" {
   depends_on                = [azurerm_network_interface.passiveport1]
@@ -224,12 +190,6 @@ resource "azurerm_network_interface_security_group_association" "passiveport1nsg
 resource "azurerm_network_interface_security_group_association" "passiveport2nsg" {
   depends_on                = [azurerm_network_interface.passiveport2]
   network_interface_id      = azurerm_network_interface.passiveport2.id
-  network_security_group_id = azurerm_network_security_group.privatenetworknsg.id
-}
-
-resource "azurerm_network_interface_security_group_association" "passiveport3nsg" {
-  depends_on                = [azurerm_network_interface.passiveport3]
-  network_interface_id      = azurerm_network_interface.passiveport3.id
   network_security_group_id = azurerm_network_security_group.privatenetworknsg.id
 }
 

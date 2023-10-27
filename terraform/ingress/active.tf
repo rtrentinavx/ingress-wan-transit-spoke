@@ -2,7 +2,7 @@ resource "azurerm_virtual_machine" "activefgtvm" {
   name                             = var.firewall_name[0]
   location                         = data.azurerm_resource_group.resource-group.location
   resource_group_name              = data.azurerm_resource_group.resource-group.name
-  network_interface_ids            = [azurerm_network_interface.activeport1.id, azurerm_network_interface.activeport2.id, azurerm_network_interface.activeport3.id]
+  network_interface_ids            = [azurerm_network_interface.activeport1.id, azurerm_network_interface.activeport2.id]
   primary_network_interface_id     = azurerm_network_interface.activeport1.id
   vm_size                          = var.firewall_instance_size
   zones                            = [var.zone1]
@@ -44,18 +44,16 @@ resource "azurerm_virtual_machine" "activefgtvm" {
     admin_username = data.azurerm_key_vault_secret.secret-firewall-username.value
     admin_password = data.azurerm_key_vault_secret.secret-firewall-password.value
     custom_data = templatefile("${path.module}/config-active.conf", {
-      type            = var.firewall_image
-      license_file    = var.license
-      port1_ip        = cidrhost(var.subnet_prefixes[3], 4)
-      port1_mask      = cidrnetmask(var.subnet_prefixes[3])
-      port2_ip        = cidrhost(var.subnet_prefixes[4], 4)
-      port2_mask      = cidrnetmask(var.subnet_prefixes[4])
-      port3_ip        = cidrhost(var.subnet_prefixes[5], 4)
-      port3_mask      = cidrnetmask(var.subnet_prefixes[5])
-      mgmt_gateway_ip = cidrhost(var.subnet_prefixes[3], 1)
-      defaultgwy      = cidrhost(var.subnet_prefixes[4], 1)
-      rfc1918gwy      = cidrhost(var.subnet_prefixes[5], 1)
-      adminsport      = var.adminsport
+      type          = var.firewall_image
+      license_file  = var.license
+      firewall_name = var.firewall_name[0]
+      port1_ip      = cidrhost(var.subnet_prefixes[3], 4)
+      port1_mask    = cidrnetmask(var.subnet_prefixes[3])
+      port2_ip      = cidrhost(var.subnet_prefixes[4], 4)
+      port2_mask    = cidrnetmask(var.subnet_prefixes[4])
+      defaultgwy    = cidrhost(var.subnet_prefixes[3], 1)
+      rfc1918gwy    = cidrhost(var.subnet_prefixes[4], 1)
+      adminsport    = var.adminsport
     })
   }
 
