@@ -1,5 +1,5 @@
 module "loadbalancer-external" {
-  depends_on = [ azurerm_virtual_machine.activefgtvm, azurerm_virtual_machine.passivefgtvm ]
+  depends_on = [ azurerm_virtual_machine.firewall-1, azurerm_virtual_machine.firewall-2 ]
   source                 = "Azure/loadbalancer/azurerm"
   version                = "4.4.0"
   type                   = "public"
@@ -16,14 +16,14 @@ module "loadbalancer-external" {
   tags                   = var.tags
 }
 
-resource "azurerm_lb_backend_address_pool_address" "lb_pool_address_firewall-external-active" {
+resource "azurerm_lb_backend_address_pool_address" "lb_pool_address_firewall-external-firewall-1" {
   name                    = var.firewall_name[0]
   backend_address_pool_id = module.loadbalancer-external.azurerm_lb_backend_address_pool_id
   virtual_network_id      = module.vnet.vnet_id
   ip_address              = cidrhost(var.subnet_prefixes[0], 4)
 }
 
-resource "azurerm_lb_backend_address_pool_address" "lb_pool_address_firewall-external-passive" {
+resource "azurerm_lb_backend_address_pool_address" "lb_pool_address_firewall-external-firewall-2" {
   name                    = var.firewall_name[1]
   backend_address_pool_id = module.loadbalancer-external.azurerm_lb_backend_address_pool_id
   virtual_network_id      = module.vnet.vnet_id
@@ -31,7 +31,7 @@ resource "azurerm_lb_backend_address_pool_address" "lb_pool_address_firewall-ext
 }
 
 module "loadbalancer-internal" {
-  depends_on = [ azurerm_virtual_machine.activefgtvm, azurerm_virtual_machine.passivefgtvm ]
+  depends_on = [ azurerm_virtual_machine.firewall-1, azurerm_virtual_machine.firewall-2 ]
   source                 = "Azure/loadbalancer/azurerm"
   version                = "4.4.0"
   type                   = "private"
@@ -51,14 +51,14 @@ module "loadbalancer-internal" {
   tags                   = var.tags
 }
 
-resource "azurerm_lb_backend_address_pool_address" "lb_pool_address_firewall-internal-active" {
+resource "azurerm_lb_backend_address_pool_address" "lb_pool_address_firewall-internal-firewall-1" {
   name                    = var.firewall_name[0]
   backend_address_pool_id = module.loadbalancer-internal.azurerm_lb_backend_address_pool_id
   virtual_network_id      = module.vnet.vnet_id
   ip_address              = cidrhost(var.subnet_prefixes[1], 4)
 }
 
-resource "azurerm_lb_backend_address_pool_address" "lb_pool_address_firewall-internal-passive" {
+resource "azurerm_lb_backend_address_pool_address" "lb_pool_address_firewall-internal-firewall-2" {
   name                    = var.firewall_name[1]
   backend_address_pool_id = module.loadbalancer-internal.azurerm_lb_backend_address_pool_id
   virtual_network_id      = module.vnet.vnet_id

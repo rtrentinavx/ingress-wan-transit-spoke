@@ -1,9 +1,9 @@
-resource "azurerm_virtual_machine" "activefgtvm" {
+resource "azurerm_virtual_machine" "firewall-1" {
   name                             = var.firewall_name[0]
   location                         = data.azurerm_resource_group.resource-group.location
   resource_group_name              = data.azurerm_resource_group.resource-group.name
-  network_interface_ids            = [azurerm_network_interface.activeport1.id, azurerm_network_interface.activeport2.id, azurerm_network_interface.activeport3.id]
-  primary_network_interface_id     = azurerm_network_interface.activeport1.id
+  network_interface_ids            = [azurerm_network_interface.firewall-1-port1.id, azurerm_network_interface.firewall-1-port2.id, azurerm_network_interface.firewall-1-port3.id]
+  primary_network_interface_id     = azurerm_network_interface.firewall-1-port1.id
   vm_size                          = var.firewall_instance_size
   zones                            = [var.zone1]
   delete_os_disk_on_termination    = true
@@ -44,7 +44,7 @@ resource "azurerm_virtual_machine" "activefgtvm" {
     computer_name  = var.firewall_name[0]
     admin_username = data.azurerm_key_vault_secret.secret-firewall-username.value
     admin_password = data.azurerm_key_vault_secret.secret-firewall-password.value
-    custom_data = templatefile("${path.module}/config-active.conf", {
+    custom_data = templatefile("${path.module}/config-firewall-1.conf", {
       type                   = var.firewall_image
       license_file           = var.license
       firewall_name          = var.firewall_name[0]

@@ -11,9 +11,9 @@ module "vnet" {
   tags                = var.tags
 }
 
-resource "azurerm_public_ip" "ActiveMGMTIP" {
+resource "azurerm_public_ip" "firewall-1-MGMTIP" {
   count               = var.management == "public" ? 1 : 0
-  name                = "ActiveMGMTIP"
+  name                = "firewall-1-MGMTIP"
   location            = data.azurerm_resource_group.resource-group.location
   resource_group_name = data.azurerm_resource_group.resource-group.name
   allocation_method   = "Static"
@@ -22,9 +22,9 @@ resource "azurerm_public_ip" "ActiveMGMTIP" {
   tags                = var.tags
 }
 
-resource "azurerm_public_ip" "PassiveMGMTIP" {
+resource "azurerm_public_ip" "firewall-2-MGMTIP" {
   count               = var.management == "public" ? 1 : 0
-  name                = "PassiveMGMTIP"
+  name                = "firewall-2-MGMTIP"
   location            = data.azurerm_resource_group.resource-group.location
   resource_group_name = data.azurerm_resource_group.resource-group.name
   allocation_method   = "Static"
@@ -39,11 +39,11 @@ resource "azurerm_network_security_group" "publicnetworknsg" {
   resource_group_name = data.azurerm_resource_group.resource-group.name
 
   security_rule {
-    name                       = "TCP"
+    name                       = "AllowAllInbound"
     priority                   = 1001
     direction                  = "Inbound"
     access                     = "Allow"
-    protocol                   = "Tcp"
+    protocol                   = "*"
     source_port_range          = "*"
     destination_port_range     = "*"
     source_address_prefix      = "*"
@@ -99,8 +99,8 @@ resource "azurerm_network_security_rule" "outgoing_private" {
   network_security_group_name = azurerm_network_security_group.privatenetworknsg.name
 }
 
-resource "azurerm_network_interface" "activeport1" {
-  name                          = "activeport1"
+resource "azurerm_network_interface" "firewall-1-port1" {
+  name                          = "firewall-1-port1"
   location                      = data.azurerm_resource_group.resource-group.location
   resource_group_name           = data.azurerm_resource_group.resource-group.name
   enable_accelerated_networking = var.accelerate == "true" ? true : false
@@ -112,13 +112,13 @@ resource "azurerm_network_interface" "activeport1" {
     private_ip_address_allocation = "Static"
     private_ip_address            = cidrhost(var.subnet_prefixes[3], 4)
     primary                       = true
-    public_ip_address_id          = var.management == "public" ? azurerm_public_ip.ActiveMGMTIP[0].id : null
+    public_ip_address_id          = var.management == "public" ? azurerm_public_ip.firewall-1-MGMTIP[0].id : null
   }
   tags = var.tags
 }
 
-resource "azurerm_network_interface" "activeport2" {
-  name                          = "activeport2"
+resource "azurerm_network_interface" "firewall-1-port2" {
+  name                          = "firewall-1-port2"
   location                      = data.azurerm_resource_group.resource-group.location
   resource_group_name           = data.azurerm_resource_group.resource-group.name
   enable_ip_forwarding          = true
@@ -126,7 +126,7 @@ resource "azurerm_network_interface" "activeport2" {
 
   ip_configuration {
     name                          = "ipconfig1"
-    subnet_id                     = module.vnet.vnet_subnets_name_id["privatesubnet-active"]
+    subnet_id                     = module.vnet.vnet_subnets_name_id["privatesubnet-1"]
     private_ip_address_allocation = "Static"
     private_ip_address            = cidrhost(var.subnet_prefixes[4], 4)
   }
@@ -134,20 +134,20 @@ resource "azurerm_network_interface" "activeport2" {
 }
 
 
-resource "azurerm_network_interface_security_group_association" "port1nsg" {
-  depends_on                = [azurerm_network_interface.activeport1]
-  network_interface_id      = azurerm_network_interface.activeport1.id
+resource "azurerm_network_interface_security_group_association" "firewall-1-port1nsg" {
+  depends_on                = [azurerm_network_interface.firewall-1-port1]
+  network_interface_id      = azurerm_network_interface.firewall-1-port1.id
   network_security_group_id = azurerm_network_security_group.publicnetworknsg.id
 }
 
-resource "azurerm_network_interface_security_group_association" "port2nsg" {
-  depends_on                = [azurerm_network_interface.activeport2]
-  network_interface_id      = azurerm_network_interface.activeport2.id
+resource "azurerm_network_interface_security_group_association" "firewall-1-port2nsg" {
+  depends_on                = [azurerm_network_interface.firewall-1-port2]
+  network_interface_id      = azurerm_network_interface.firewall-1-port2.id
   network_security_group_id = azurerm_network_security_group.privatenetworknsg.id
 }
 
-resource "azurerm_network_interface" "passiveport1" {
-  name                          = "passiveport1"
+resource "azurerm_network_interface" "firewall-2-port1" {
+  name                          = "firewall-2-port1"
   location                      = data.azurerm_resource_group.resource-group.location
   resource_group_name           = data.azurerm_resource_group.resource-group.name
   enable_accelerated_networking = var.accelerate == "true" ? true : false
@@ -159,13 +159,13 @@ resource "azurerm_network_interface" "passiveport1" {
     private_ip_address_allocation = "Static"
     private_ip_address            = cidrhost(var.subnet_prefixes[3], 5)
     primary                       = true
-    public_ip_address_id          = var.management == "public" ? azurerm_public_ip.PassiveMGMTIP[0].id : null
+    public_ip_address_id          = var.management == "public" ? azurerm_public_ip.firewall-2-MGMTIP[0].id : null
   }
   tags = var.tags
 }
 
-resource "azurerm_network_interface" "passiveport2" {
-  name                          = "passiveport2"
+resource "azurerm_network_interface" "firewall-2-port2" {
+  name                          = "firewall-2-port2"
   location                      = data.azurerm_resource_group.resource-group.location
   resource_group_name           = data.azurerm_resource_group.resource-group.name
   enable_ip_forwarding          = true
@@ -173,7 +173,7 @@ resource "azurerm_network_interface" "passiveport2" {
 
   ip_configuration {
     name                          = "ipconfig1"
-    subnet_id                     = module.vnet.vnet_subnets_name_id["privatesubnet-passive"]
+    subnet_id                     = module.vnet.vnet_subnets_name_id["privatesubnet-2"]
     private_ip_address_allocation = "Static"
     private_ip_address            = cidrhost(var.subnet_prefixes[5], 5)
   }
@@ -181,15 +181,15 @@ resource "azurerm_network_interface" "passiveport2" {
 }
 
 
-resource "azurerm_network_interface_security_group_association" "passiveport1nsg" {
-  depends_on                = [azurerm_network_interface.passiveport1]
-  network_interface_id      = azurerm_network_interface.passiveport1.id
+resource "azurerm_network_interface_security_group_association" "firewall-2-port1nsg" {
+  depends_on                = [azurerm_network_interface.firewall-2-port1]
+  network_interface_id      = azurerm_network_interface.firewall-2-port1.id
   network_security_group_id = azurerm_network_security_group.publicnetworknsg.id
 }
 
-resource "azurerm_network_interface_security_group_association" "passiveport2nsg" {
-  depends_on                = [azurerm_network_interface.passiveport2]
-  network_interface_id      = azurerm_network_interface.passiveport2.id
+resource "azurerm_network_interface_security_group_association" "firewall-2-port2nsg" {
+  depends_on                = [azurerm_network_interface.firewall-2-port2]
+  network_interface_id      = azurerm_network_interface.firewall-2-port2.id
   network_security_group_id = azurerm_network_security_group.privatenetworknsg.id
 }
 
@@ -216,7 +216,7 @@ module "regions" {
 }
 
 module "mc-spoke" {
-  depends_on             = [azurerm_virtual_machine.activefgtvm, azurerm_virtual_machine.passivefgtvm]
+  depends_on             = [azurerm_virtual_machine.firewall-1, azurerm_virtual_machine.firewall-2]
   source                 = "terraform-aviatrix-modules/mc-spoke/aviatrix"
   version                = "1.6.5"
   cloud                  = "Azure"

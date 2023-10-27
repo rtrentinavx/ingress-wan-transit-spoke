@@ -1,10 +1,9 @@
-resource "azurerm_virtual_machine" "passivefgtvm" {
-  depends_on                       = [azurerm_virtual_machine.activefgtvm]
+resource "azurerm_virtual_machine" "firewall-2" {
   name                             = var.firewall_name[1]
   location                         = var.location
   resource_group_name              = data.azurerm_resource_group.resource-group.name
-  network_interface_ids            = [azurerm_network_interface.passiveport1.id, azurerm_network_interface.passiveport2.id]
-  primary_network_interface_id     = azurerm_network_interface.passiveport1.id
+  network_interface_ids            = [azurerm_network_interface.firewall-2-port1.id, azurerm_network_interface.firewall-2-port2.id]
+  primary_network_interface_id     = azurerm_network_interface.firewall-2-port1.id
   vm_size                          = var.firewall_instance_size
   zones                            = [var.zone2]
   delete_os_disk_on_termination    = true
@@ -25,7 +24,7 @@ resource "azurerm_virtual_machine" "passivefgtvm" {
   }
 
   storage_os_disk {
-    name              = "${var.firewall_name[1]}passiveosDisk"
+    name              = "${var.firewall_name[1]}osDisk"
     caching           = "ReadWrite"
     managed_disk_type = "Standard_LRS"
     create_option     = "FromImage"
@@ -33,7 +32,7 @@ resource "azurerm_virtual_machine" "passivefgtvm" {
 
   # Log data disks
   storage_data_disk {
-    name              = "${var.firewall_name[1]}passivedatadisk"
+    name              = "${var.firewall_name[1]}datadisk"
     managed_disk_type = "Standard_LRS"
     create_option     = "Empty"
     lun               = 0
@@ -44,7 +43,7 @@ resource "azurerm_virtual_machine" "passivefgtvm" {
     computer_name  = var.firewall_name[0]
     admin_username = data.azurerm_key_vault_secret.secret-firewall-username.value
     admin_password = data.azurerm_key_vault_secret.secret-firewall-password.value
-    custom_data = templatefile("${path.module}/config-passive.conf", {
+    custom_data = templatefile("${path.module}/config-firewall-2.conf", {
       type          = var.firewall_image
       license_file  = var.license2
       firewall_name = var.firewall_name[1]

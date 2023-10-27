@@ -1,5 +1,5 @@
 module "loadbalancer" {
-  depends_on             = [azurerm_virtual_machine.activefgtvm, azurerm_virtual_machine.passivefgtvm]
+  depends_on             = [azurerm_virtual_machine.firewall-1, azurerm_virtual_machine.firewall-1]
   source                 = "Azure/loadbalancer/azurerm"
   version                = "4.4.0"
   type                   = "public"
