@@ -1,4 +1,5 @@
 resource "azurerm_virtual_machine" "firewall-2" {
+  depends_on = [ azurerm_virtual_machine.firewall-1 ]
   name                             = var.firewall_name[1]
   location                         = var.location
   resource_group_name              = data.azurerm_resource_group.resource-group.name

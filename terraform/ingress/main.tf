@@ -58,7 +58,7 @@ resource "azurerm_network_security_group" "privatenetworknsg" {
   resource_group_name = data.azurerm_resource_group.resource-group.name
 
   security_rule {
-    name                       = "All"
+    name                       = "AllowAllInbound"
     priority                   = 1001
     direction                  = "Inbound"
     access                     = "Allow"
@@ -72,7 +72,7 @@ resource "azurerm_network_security_group" "privatenetworknsg" {
 }
 
 resource "azurerm_network_security_rule" "outgoing_public" {
-  name                        = "egress"
+  name                        = "AllowAllOutbound"
   priority                    = 100
   direction                   = "Outbound"
   access                      = "Allow"
@@ -86,7 +86,7 @@ resource "azurerm_network_security_rule" "outgoing_public" {
 }
 
 resource "azurerm_network_security_rule" "outgoing_private" {
-  name                        = "egress-private"
+  name                        = "AllowAllOutbound"
   priority                    = 100
   direction                   = "Outbound"
   access                      = "Allow"
