@@ -30,6 +30,18 @@ resource "azurerm_lb_backend_address_pool_address" "lb_pool_address_firewall-ext
   ip_address              = cidrhost(var.subnet_prefixes[0], 5)
 }
 
+resource "azurerm_lb_outbound_rule" "lb_outbound_rule-external" {
+  name                    = "sdwan-external-lb-outboundrule"
+  backend_address_pool_id = module.loadbalancer-external.azurerm_lb_backend_address_pool_id
+  enable_tcp_reset = true
+  loadbalancer_id         = module.loadbalancer-external.azurerm_lb_id
+  protocol                = "All"
+
+  frontend_ip_configuration {
+    name = "sdwan-external-lb-${data.azurerm_resource_group.resource-group.location}"
+  }
+}
+
 module "loadbalancer-internal" {
   depends_on = [ azurerm_virtual_machine.firewall-1, azurerm_virtual_machine.firewall-2 ]
   source                 = "Azure/loadbalancer/azurerm"
