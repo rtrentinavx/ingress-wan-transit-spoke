@@ -289,3 +289,9 @@ resource "aviatrix_transit_external_device_conn" "transit_1_to_forti" {
   vpc_id                    = data.aviatrix_transit_gateway.transit_gateway.vpc_id
   tunnel_protocol           = "LAN"
 }
+
+resource "aviatrix_transit_firenet_policy" "transit_1_to_forti_transit_firenet_policy" {
+  depends_on = [ aviatrix_transit_external_device_conn.transit_1_to_forti ]
+  transit_firenet_gateway_name = var.transit_gateway
+  inspected_resource_name      = "SITE2CLOUD:${aviatrix_transit_external_device_conn.transit_1_to_forti.connection_name}"
+}
