@@ -11,6 +11,29 @@ module "vnet" {
   tags                = var.tags
 }
 
+resource "azurerm_route_table" "route_table" {
+  for_each                      = var.subnet_names
+  name                          = "rt-${each.key}"
+  location                      = data.azurerm_resource_group.resource-group.location
+  resource_group_name           = var.resource_group
+  disable_bgp_route_propagation = true
+
+  dynamic "route" {
+    for_each = var.subnet_names == "gw-subnet" || var.subnet_names == "hagw-subnet" || var.subnet_names == "frontend" || var.subnet_names == "publicsubnet" ? [0] : [1]
+    content {
+      name           = "avx-rt-default"
+      address_prefix = "0.0.0.0/0"
+      next_hop_type  = "None"
+    }
+  }
+}
+
+resource "azurerm_subnet_route_table_association" "subnet_route_table_association" {
+  for_each       = var.subnet_names
+  route_table_id = azurerm_route_table.route_table[each.key].id
+  subnet_id      = module.vnet.vnet_subnets_name_id[each.key]
+}
+
 resource "azurerm_public_ip" "firewall-1-MGMTIP" {
   count               = var.management == "public" ? 1 : 0
   name                = "firewall-1-MGMTIP"
@@ -104,7 +127,7 @@ resource "azurerm_network_interface" "firewall-1-port1" {
   location                      = data.azurerm_resource_group.resource-group.location
   resource_group_name           = data.azurerm_resource_group.resource-group.name
   enable_accelerated_networking = var.accelerate == "true" ? true : false
-  enable_ip_forwarding = true 
+  enable_ip_forwarding          = true
 
   ip_configuration {
     name                          = "ipconfig1"
@@ -151,7 +174,7 @@ resource "azurerm_network_interface" "firewall-2-port1" {
   location                      = data.azurerm_resource_group.resource-group.location
   resource_group_name           = data.azurerm_resource_group.resource-group.name
   enable_accelerated_networking = var.accelerate == "true" ? true : false
-  enable_ip_forwarding = true 
+  enable_ip_forwarding          = true
 
   ip_configuration {
     name                          = "ipconfig1"

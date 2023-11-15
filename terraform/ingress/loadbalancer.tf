@@ -3,7 +3,7 @@ module "loadbalancer" {
   source                 = "Azure/loadbalancer/azurerm"
   version                = "4.4.0"
   type                   = "public"
-  disable_outbound_snat = true 
+  disable_outbound_snat  = true
   frontend_name          = "ingress-lb-${data.azurerm_resource_group.resource-group.location}"
   resource_group_name    = data.azurerm_resource_group.resource-group.name
   location               = data.azurerm_resource_group.resource-group.location
