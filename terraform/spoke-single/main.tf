@@ -12,6 +12,25 @@ module "vnet" {
   tags                = var.tags
 }
 
+resource "azurerm_route_table" "private_route_table" {
+  name                          = "rt-private"
+  location                      = data.azurerm_resource_group.resource-group.location
+  resource_group_name           = var.resource_group
+  disable_bgp_route_propagation = true
+
+  route {
+      name           = "avx-rt-default"
+      address_prefix = "0.0.0.0/0"
+      next_hop_type  = "None"
+  }
+}
+
+resource "azurerm_subnet_route_table_association" "subnet_route_table_association" {
+  for_each = var.subnet_names == "gw-subnet" ? [0] : [1]
+  route_table_id = azurerm_route_table.private_route_table.id
+  subnet_id      = module.vnet.vnet_subnets_name_id[each.key]
+}
+
 module "regions" {
   source       = "claranet/regions/azurerm"
   version      = "7.0.0"
