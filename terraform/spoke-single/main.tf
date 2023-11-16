@@ -1,3 +1,6 @@
+locals {
+  filtered_subnet_list = toset([for name in var.subnet_names: name if strcontains(name, "avx") == false && strcontains(name, "appgw") == false])
+}
 module "vnet" {
   count               = var.greenfield == true ? 1 : 0
   source              = "Azure/vnet/azurerm"
@@ -12,23 +15,57 @@ module "vnet" {
   tags                = var.tags
 }
 
-resource "azurerm_route_table" "private_route_table" {
-  name                          = "rt-private"
+resource "azurerm_route_table" "private_route_table_1" {
+  name                          = "rt-private-1"
   location                      = data.azurerm_resource_group.resource-group.location
   resource_group_name           = var.resource_group
   disable_bgp_route_propagation = true
 
   route {
-      name           = "avx-rt-default"
-      address_prefix = "0.0.0.0/0"
-      next_hop_type  = "None"
+    name           = "avx-rt-default"
+    address_prefix = "0.0.0.0/0"
+    next_hop_type  = "None"
   }
 }
 
+resource "azurerm_route_table" "private_route_table_2" {
+  name                          = "rt-private-2"
+  location                      = data.azurerm_resource_group.resource-group.location
+  resource_group_name           = var.resource_group
+  disable_bgp_route_propagation = true
+
+  route {
+    name           = "avx-rt-default"
+    address_prefix = "0.0.0.0/0"
+    next_hop_type  = "None"
+  }
+}
+
+resource "azurerm_route" "custom_route_1" {
+  for_each               = var.custom_routes
+  name                   = "rt-custom-${each.key}"
+  resource_group_name    = var.resource_group
+  route_table_name       = azurerm_route_table.private_route_table_1.name
+  address_prefix         = each.value.address_prefix
+  next_hop_type          = each.value.next_hop_type
+  next_hop_in_ip_address = each.value.next_hop_in_ip_address
+}
+
+resource "azurerm_route" "custom_route_2" {
+  for_each               = var.custom_routes
+  name                   = "rt-custom-${each.key}"
+  resource_group_name    = var.resource_group
+  route_table_name       = azurerm_route_table.private_route_table_2.name
+  address_prefix         = each.value.address_prefix
+  next_hop_type          = each.value.next_hop_type
+  next_hop_in_ip_address = each.value.next_hop_in_ip_address
+}
+
+
 resource "azurerm_subnet_route_table_association" "subnet_route_table_association" {
-  for_each = var.subnet_names == "gw-subnet" ? [0] : [1]
-  route_table_id = azurerm_route_table.private_route_table.id
-  subnet_id      = module.vnet.vnet_subnets_name_id[each.key]
+  for_each = local.filtered_subnet_list
+  route_table_id = (index(var.subnet_names, each.key) % 2 == 0) ? azurerm_route_table.private_route_table_2.id : azurerm_route_table.private_route_table_1.id
+  subnet_id      = module.vnet[0].vnet_subnets_name_id[each.value]
 }
 
 module "regions" {
@@ -45,13 +82,13 @@ module "mc-spoke" {
   region                 = module.regions.location
   cidr                   = element(var.address_space, 0)
   account                = data.azurerm_subscription.current.display_name
-  attached = var.greenfield == true ? true : false 
+  attached               = var.greenfield == true ? true : false
   transit_gw             = var.transit_gateway
   enable_max_performance = var.enable_max_performance != false ? var.enable_max_performance : null
   insane_mode            = var.insane_mode
   gw_name                = var.gw_name
   gw_subnet              = var.subnet_prefixes[0]
-  hagw_subnet            = var.subnet_prefixes[1]
+  hagw_subnet            = var.subnet_prefixes[0]
   inspection             = true
   instance_size          = var.instance_size
   tags                   = var.tags

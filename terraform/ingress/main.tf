@@ -229,7 +229,7 @@ module "mc-spoke" {
   insane_mode            = var.insane_mode
   gw_name                = var.gw_name
   gw_subnet              = var.subnet_prefixes[0]
-  hagw_subnet            = var.subnet_prefixes[1]
+  hagw_subnet            = var.subnet_prefixes[0]
   inspection             = true
   instance_size          = var.instance_size
   tags                   = var.tags
