@@ -248,7 +248,8 @@ resource "azurerm_storage_account" "fgtstorageaccount" {
   location                 = data.azurerm_resource_group.resource-group.location
   account_replication_type = "LRS"
   account_tier             = "Standard"
-  tags                     = var.tags
+  public_network_access_enabled  = false
+  tags                     = var.tags 
 }
 
 resource "azurerm_virtual_network_peering" "transit_1_to_sdwan" {

@@ -206,6 +206,7 @@ resource "azurerm_storage_account" "fgtstorageaccount" {
   location                 = data.azurerm_resource_group.resource-group.location
   account_replication_type = "LRS"
   account_tier             = "Standard"
+  public_network_access_enabled  = false
   tags                     = var.tags
 }
 
