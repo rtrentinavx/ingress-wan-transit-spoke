@@ -1,8 +1,8 @@
 resource "azurerm_public_ip" "firewall-2-MGMTIP" {
   count               = var.management == "public" ? 1 : 0
   name                = "firewall-2-MGMTIP"
-  location            = data.azurerm_resource_group.resource-group.location
-  resource_group_name = data.azurerm_resource_group.resource-group.name
+  location            = data.azurerm_resource_group.sdwan-resource-group.location
+  resource_group_name = data.azurerm_resource_group.sdwan-resource-group.name
   allocation_method   = "Static"
   sku                 = "Standard"
   sku_tier            = "Regional"
@@ -13,8 +13,8 @@ resource "azurerm_public_ip" "firewall-2-MGMTIP" {
 
 resource "azurerm_network_interface" "firewall-2-port1" {
   name                          = "firewall-2-port1"
-  location                      = data.azurerm_resource_group.resource-group.location
-  resource_group_name           = data.azurerm_resource_group.resource-group.name
+  location                      = data.azurerm_resource_group.sdwan-resource-group.location
+  resource_group_name           = data.azurerm_resource_group.sdwan-resource-group.name
   enable_accelerated_networking = var.accelerate == "true" ? true : false
   enable_ip_forwarding          = true
 
@@ -31,8 +31,8 @@ resource "azurerm_network_interface" "firewall-2-port1" {
 
 resource "azurerm_network_interface" "firewall-2-port2" {
   name                          = "firewall-2-port2"
-  location                      = data.azurerm_resource_group.resource-group.location
-  resource_group_name           = data.azurerm_resource_group.resource-group.name
+  location                      = data.azurerm_resource_group.sdwan-resource-group.location
+  resource_group_name           = data.azurerm_resource_group.sdwan-resource-group.name
   enable_ip_forwarding          = true
   enable_accelerated_networking = var.accelerate == "true" ? true : false
 
@@ -47,8 +47,8 @@ resource "azurerm_network_interface" "firewall-2-port2" {
 
 resource "azurerm_network_interface" "firewall-2-port3" {
   name                          = "firewall-2-port3"
-  location                      = data.azurerm_resource_group.resource-group.location
-  resource_group_name           = data.azurerm_resource_group.resource-group.name
+  location                      = data.azurerm_resource_group.sdwan-resource-group.location
+  resource_group_name           = data.azurerm_resource_group.sdwan-resource-group.name
   enable_ip_forwarding          = true
   enable_accelerated_networking = var.accelerate == "true" ? true : false
 
@@ -83,7 +83,7 @@ resource "azurerm_virtual_machine" "firewall-2" {
   depends_on                       = [azurerm_virtual_machine.firewall-1]
   name                             = var.firewall_name[1]
   location                         = var.location
-  resource_group_name              = data.azurerm_resource_group.resource-group.name
+  resource_group_name              = data.azurerm_resource_group.sdwan-resource-group.name
   network_interface_ids            = [azurerm_network_interface.firewall-2-port1.id, azurerm_network_interface.firewall-2-port2.id, azurerm_network_interface.firewall-2-port3.id]
   primary_network_interface_id     = azurerm_network_interface.firewall-2-port1.id
   vm_size                          = var.firewall_instance_size

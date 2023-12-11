@@ -1,8 +1,12 @@
 data "azurerm_subscription" "current" {
 }
 
-data "azurerm_resource_group" "resource-group" {
-  name = var.resource_group
+data "azurerm_resource_group" "sdwan-resource-group" {
+  name = var.sdwan_resource_group
+}
+
+data "azurerm_resource_group" "ars-resource-group" {
+  name = var.ars_resource_group
 }
 
 data "azurerm_resource_group" "rg-keyvault" {
