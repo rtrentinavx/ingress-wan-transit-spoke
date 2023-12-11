@@ -14,7 +14,7 @@ module "mc-transit" {
   connected_transit             = true
   enable_advertise_transit_cidr = true 
   enable_bgp_over_lan           = true
-  enable_egress_transit_firenet = true
+  enable_egress_transit_firenet = false
   enable_transit_firenet        = true
   insane_mode                   = true
   instance_size                 = var.instance_size

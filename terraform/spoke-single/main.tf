@@ -34,6 +34,7 @@ resource "azurerm_route" "custom_route" {
 }
 
 resource "azurerm_subnet_route_table_association" "subnet_route_table_association" {
+  depends_on = [ module.vnet ]
   for_each = local.filtered_subnet_list
   route_table_id = (index(var.subnet_names, each.key) % 2 == 0) ? azurerm_route_table.private_route_table[0].id : azurerm_route_table.private_route_table[1].id
   subnet_id      = module.vnet[0].vnet_subnets_name_id[each.value]
@@ -46,6 +47,7 @@ module "regions" {
 }
 
 module "mc-spoke" {
+  depends_on = [ module.vnet ]
   source                 = "terraform-aviatrix-modules/mc-spoke/aviatrix"
   version                = "1.6.6"
   cloud                  = "Azure"
