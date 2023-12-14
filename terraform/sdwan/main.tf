@@ -25,6 +25,7 @@ module "sdwan-vnet" {
 }
 
 resource "azurerm_virtual_network_peering" "transit_to_ars-virtual_network_peering" {
+  depends_on = [ azurerm_route_server.ars ]
   name                         = "transit-to-ars"
   resource_group_name          = split(":", data.aviatrix_transit_gateway.transit_gateway.vpc_id)[1]
   virtual_network_name         = split(":", data.aviatrix_transit_gateway.transit_gateway.vpc_id)[0]
@@ -35,6 +36,7 @@ resource "azurerm_virtual_network_peering" "transit_to_ars-virtual_network_peeri
 }
 
 resource "azurerm_virtual_network_peering" "ars_to_transit-virtual_network_peering" {
+  depends_on = [ azurerm_route_server.ars  ]
   name                         = "ars-to-transit"
   resource_group_name          = data.azurerm_resource_group.ars-resource-group.name
   virtual_network_name         = module.ars-vnet.vnet_name
@@ -65,25 +67,25 @@ resource "azurerm_virtual_network_peering" "sdwan-to-transit-virtual_network_pee
 }
 
 resource "azurerm_virtual_network_peering" "ars_to_sdwan-virtual_network_peering" {
-  depends_on = [ module.ars-vnet, module.sdwan-vnet ]
+  depends_on = [azurerm_route_server.ars]
   name                         = "ars-to-sdwan"
   resource_group_name          = data.azurerm_resource_group.ars-resource-group.name
   virtual_network_name         = module.ars-vnet.vnet_name
   remote_virtual_network_id    = module.sdwan-vnet.vnet_id
   allow_virtual_network_access = true
   allow_forwarded_traffic      = true
-  use_remote_gateways          = false
+  allow_gateway_transit            = true 
 }
 
 resource "azurerm_virtual_network_peering" "sdwan-to-ars-virtual_network_peering" {
-  depends_on = [ module.ars-vnet, module.sdwan-vnet ]
+  depends_on                   = [azurerm_route_server.ars]
   name                         = "sdwan-to-ars"
   resource_group_name          = data.azurerm_resource_group.sdwan-resource-group.name
   virtual_network_name         = module.sdwan-vnet.vnet_name
   remote_virtual_network_id    = module.ars-vnet.vnet_id
   allow_virtual_network_access = true
   allow_forwarded_traffic      = true
-  allow_gateway_transit        = false
+  use_remote_gateways        = true
 }
 
 resource "azurerm_network_security_group" "publicnetworknsg" {
@@ -168,7 +170,13 @@ resource "azurerm_storage_account" "fgtstorageaccount" {
   tags                          = var.tags
 }
 
+resource "time_sleep" "transit-wait_120_seconds" {
+  depends_on = [azurerm_virtual_network_peering.ars_to_transit-virtual_network_peering]
+  create_duration = "120s"
+}
+
 resource "aviatrix_transit_external_device_conn" "transit_to_ars" {
+  depends_on = [ time_sleep.transit-wait_120_seconds ]
   backup_bgp_remote_as_num  = azurerm_route_server.ars.virtual_router_asn
   backup_local_lan_ip       = data.aviatrix_transit_gateway.transit_gateway.ha_bgp_lan_ip_list[0]
   backup_remote_lan_ip      = tolist(azurerm_route_server.ars.virtual_router_ips)[1]
@@ -187,6 +195,7 @@ resource "aviatrix_transit_external_device_conn" "transit_to_ars" {
 }
 
 resource "azurerm_route_server_bgp_connection" "ars_to_transit_primary" {
+  depends_on = [ time_sleep.transit-wait_120_seconds ]
   name            = data.aviatrix_transit_gateway.transit_gateway.gw_name
   route_server_id = azurerm_route_server.ars.id
   peer_asn        = data.aviatrix_transit_gateway.transit_gateway.local_as_number
@@ -194,14 +203,20 @@ resource "azurerm_route_server_bgp_connection" "ars_to_transit_primary" {
 }
 
 resource "azurerm_route_server_bgp_connection" "ars_to_transit_secondary" {
+  depends_on = [ time_sleep.transit-wait_120_seconds ]
   name            = data.aviatrix_transit_gateway.transit_gateway.ha_gw_name
   route_server_id = azurerm_route_server.ars.id
   peer_asn        = data.aviatrix_transit_gateway.transit_gateway.local_as_number
   peer_ip         = data.aviatrix_transit_gateway.transit_gateway.ha_bgp_lan_ip_list[0]
 }
 
+resource "time_sleep" "forti-wait_120_seconds" {
+  depends_on = [azurerm_virtual_network_peering.sdwan-to-transit-virtual_network_peering]
+  create_duration = "120s"
+}
+
 resource "aviatrix_transit_external_device_conn" "transit_to_forti" {
-  depends_on                = [azurerm_virtual_network_peering.ars_to_sdwan-virtual_network_peering]
+  depends_on                = [time_sleep.forti-wait_120_seconds]
   backup_bgp_remote_as_num  = var.firewall_as_num
   backup_local_lan_ip       = data.aviatrix_transit_gateway.transit_gateway.ha_bgp_lan_ip_list[1]
   backup_remote_lan_ip      = cidrhost(var.sdwan_subnet_prefixes[1], 5)
@@ -219,7 +234,13 @@ resource "aviatrix_transit_external_device_conn" "transit_to_forti" {
   tunnel_protocol           = "LAN"
 }
 
+resource "time_sleep" "ars-wait_120_seconds" {
+  depends_on = [azurerm_virtual_network_peering.sdwan-to-ars-virtual_network_peering]
+  create_duration = "120s"
+}
+
 resource "azurerm_route_server_bgp_connection" "ars_to_forti_primary" {
+  depends_on = [ time_sleep.ars-wait_120_seconds ]
   name            = "ars-to-${var.firewall_name[0]}"
   route_server_id = azurerm_route_server.ars.id
   peer_asn        = var.firewall_as_num
@@ -227,6 +248,7 @@ resource "azurerm_route_server_bgp_connection" "ars_to_forti_primary" {
 }
 
 resource "azurerm_route_server_bgp_connection" "ars_to_forti_secondary" {
+  depends_on = [ time_sleep.ars-wait_120_seconds ]
   name            = "ars-to-${var.firewall_name[1]}"
   route_server_id = azurerm_route_server.ars.id
   peer_asn        = var.firewall_as_num

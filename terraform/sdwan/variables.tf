@@ -18,10 +18,22 @@ variable "ars_address_space" { type = list(string) }
 variable "ars_subnet_names" { type = list(string) }
 variable "ars_subnet_prefixes" { type = list(string) }
 variable "express_route_location" { type = bool }
-variable "vng_name" { type = string }
-variable "vpn_gateway_type" { type = string }
-variable "vpn_type" { type = string }
-variable "vpn_sku" { type = string }
+variable "vng_name" {
+  type    = string
+  default = null
+}
+variable "vpn_gateway_type" {
+  type    = string
+  default = null
+}
+variable "vpn_type" {
+  type    = string
+  default = null
+}
+variable "vpn_sku" {
+  type    = string
+  default = null
+}
 variable "sdwan_resource_group" { type = string }
 variable "sdwan_virtual_network_name" { type = string }
 variable "sdwan_address_space" { type = list(string) }

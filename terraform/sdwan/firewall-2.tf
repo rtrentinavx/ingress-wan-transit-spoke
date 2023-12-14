@@ -147,9 +147,9 @@ resource "azurerm_virtual_machine" "firewall-2" {
       transit_gateway_as     = data.aviatrix_transit_gateway.transit_gateway.local_as_number
       transit_gateway        = data.aviatrix_transit_gateway.transit_gateway.bgp_lan_ip_list[1]
       transit_gateway_ha     = data.aviatrix_transit_gateway.transit_gateway.ha_bgp_lan_ip_list[1]
-      ars-asn = azurerm_route_server.ars.virtual_router_asn
-      ars-0 = tolist(azurerm_route_server.ars.virtual_router_ips)[0]
-      ars-1 = tolist(azurerm_route_server.ars.virtual_router_ips)[1]
+      ars-asn                = azurerm_route_server.ars.virtual_router_asn
+      ars-0                  = tolist(azurerm_route_server.ars.virtual_router_ips)[0]
+      ars-1                  = tolist(azurerm_route_server.ars.virtual_router_ips)[1]
     })
   }
 
