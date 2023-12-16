@@ -16,21 +16,34 @@ module "loadbalancer-external" {
   tags                   = var.tags
 }
 
-resource "azurerm_lb_backend_address_pool_address" "lb_pool_address_firewall-external-firewall-1" {
-  name                    = var.firewall_name[0]
-  backend_address_pool_id = module.loadbalancer-external.azurerm_lb_backend_address_pool_id
-  virtual_network_id      = module.sdwan-vnet.vnet_id
-  ip_address              = cidrhost(var.sdwan_subnet_prefixes[0], 4)
+# resource "azurerm_lb_backend_address_pool_address" "lb_pool_address_firewall-external-firewall-1" {
+#   name                    = var.firewall_name[0]
+#   backend_address_pool_id = module.loadbalancer-external.azurerm_lb_backend_address_pool_id
+#   virtual_network_id      = module.sdwan-vnet.vnet_id
+#   ip_address              = cidrhost(var.sdwan_subnet_prefixes[0], 4)
+# }
+
+# resource "azurerm_lb_backend_address_pool_address" "lb_pool_address_firewall-external-firewall-2" {
+#   name                    = var.firewall_name[1]
+#   backend_address_pool_id = module.loadbalancer-external.azurerm_lb_backend_address_pool_id
+#   virtual_network_id      = module.sdwan-vnet.vnet_id
+#   ip_address              = cidrhost(var.sdwan_subnet_prefixes[0], 5)
+# }
+
+resource "azurerm_network_interface_backend_address_pool_association" "pool_address_firewall-external-firewall-1" {
+  network_interface_id    = azurerm_network_interface.firewall-1-port1.id
+  ip_configuration_name   =  "ipconfig1"
+  backend_address_pool_id =  module.loadbalancer-external.azurerm_lb_backend_address_pool_id
 }
 
-resource "azurerm_lb_backend_address_pool_address" "lb_pool_address_firewall-external-firewall-2" {
-  name                    = var.firewall_name[1]
-  backend_address_pool_id = module.loadbalancer-external.azurerm_lb_backend_address_pool_id
-  virtual_network_id      = module.sdwan-vnet.vnet_id
-  ip_address              = cidrhost(var.sdwan_subnet_prefixes[0], 5)
+resource "azurerm_network_interface_backend_address_pool_association" "pool_address_firewall-external-firewall-2" {
+  network_interface_id    = azurerm_network_interface.firewall-2-port1.id
+  ip_configuration_name   =  "ipconfig1"
+  backend_address_pool_id =  module.loadbalancer-external.azurerm_lb_backend_address_pool_id
 }
 
 resource "azurerm_lb_outbound_rule" "lb_outbound_rule-external" {
+  count = var.management == "public" ? 0 : 1
   name                    = "sdwan-external-lb-outboundrule"
   backend_address_pool_id = module.loadbalancer-external.azurerm_lb_backend_address_pool_id
   enable_tcp_reset        = true
