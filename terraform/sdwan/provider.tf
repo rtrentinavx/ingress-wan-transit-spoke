@@ -5,7 +5,7 @@ terraform {
     }
     aviatrix = {
       source  = "AviatrixSystems/aviatrix"
-      version = "3.1.2"
+      version = "3.1.3"
     }
   }
   backend "azurerm" {
