@@ -47,9 +47,9 @@ resource "azurerm_virtual_machine" "firewall-2" {
       type          = var.firewall_image
       license_file  = var.license2
       firewall_name = var.firewall_name[1]
-      port1_ip      = cidrhost(var.subnet_prefixes[3], 5)
+      port1_ip      = cidrhost(var.subnet_prefixes[3], 6)
       port1_mask    = cidrnetmask(var.subnet_prefixes[3])
-      port2_ip      = cidrhost(var.subnet_prefixes[5], 5)
+      port2_ip      = cidrhost(var.subnet_prefixes[5], 6)
       port2_mask    = cidrnetmask(var.subnet_prefixes[5])
       defaultgwy    = cidrhost(var.subnet_prefixes[3], 1)
       rfc1918gwy    = cidrhost(var.subnet_prefixes[5], 1)

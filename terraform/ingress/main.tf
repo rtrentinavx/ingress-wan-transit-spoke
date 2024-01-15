@@ -110,7 +110,7 @@ resource "azurerm_network_interface" "firewall-1-port1" {
     name                          = "ipconfig1"
     subnet_id                     = module.vnet.vnet_subnets_name_id["publicsubnet"]
     private_ip_address_allocation = "Static"
-    private_ip_address            = cidrhost(var.subnet_prefixes[3], 4)
+    private_ip_address            = cidrhost(var.subnet_prefixes[3], 5)
     primary                       = true
     public_ip_address_id          = var.management == "public" ? azurerm_public_ip.firewall-1-MGMTIP[0].id : null
   }
@@ -128,7 +128,7 @@ resource "azurerm_network_interface" "firewall-1-port2" {
     name                          = "ipconfig1"
     subnet_id                     = module.vnet.vnet_subnets_name_id["privatesubnet-1"]
     private_ip_address_allocation = "Static"
-    private_ip_address            = cidrhost(var.subnet_prefixes[4], 4)
+    private_ip_address            = cidrhost(var.subnet_prefixes[4], 5)
   }
   tags = var.tags
 }
@@ -157,7 +157,7 @@ resource "azurerm_network_interface" "firewall-2-port1" {
     name                          = "ipconfig1"
     subnet_id                     = module.vnet.vnet_subnets_name_id["publicsubnet"]
     private_ip_address_allocation = "Static"
-    private_ip_address            = cidrhost(var.subnet_prefixes[3], 5)
+    private_ip_address            = cidrhost(var.subnet_prefixes[3], 6)
     primary                       = true
     public_ip_address_id          = var.management == "public" ? azurerm_public_ip.firewall-2-MGMTIP[0].id : null
   }
@@ -175,7 +175,7 @@ resource "azurerm_network_interface" "firewall-2-port2" {
     name                          = "ipconfig1"
     subnet_id                     = module.vnet.vnet_subnets_name_id["privatesubnet-2"]
     private_ip_address_allocation = "Static"
-    private_ip_address            = cidrhost(var.subnet_prefixes[5], 5)
+    private_ip_address            = cidrhost(var.subnet_prefixes[5], 6)
   }
   tags = var.tags
 }
