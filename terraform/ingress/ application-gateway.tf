@@ -43,7 +43,7 @@ resource "azurerm_application_gateway" "appgw" {
   }
 
   backend_address_pool {
-    name         = local.backend_address_pool_name
+    name = local.backend_address_pool_name
     #ip_addresses = ["${cidrhost(var.subnet_prefixes[3], 4)}", "${cidrhost(var.subnet_prefixes[3], 5)}"] firewalls 
     ip_addresses = []
 

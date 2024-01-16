@@ -6,11 +6,11 @@ resource "random_id" "randomId" {
 }
 
 resource "azurerm_storage_account" "fgtstorageaccount" {
-  name                     = "diag${random_id.randomId.hex}"
-  resource_group_name      = data.azurerm_resource_group.resource-group.name
-  location                 = data.azurerm_resource_group.resource-group.location
-  account_replication_type = "LRS"
-  account_tier             = "Standard"
-  public_network_access_enabled  = false
-  tags                     = var.tags
+  name                          = "diag${random_id.randomId.hex}"
+  resource_group_name           = data.azurerm_resource_group.resource-group.name
+  location                      = data.azurerm_resource_group.resource-group.location
+  account_replication_type      = "LRS"
+  account_tier                  = "Standard"
+  public_network_access_enabled = false
+  tags                          = var.tags
 }

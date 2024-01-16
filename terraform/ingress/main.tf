@@ -26,7 +26,7 @@ module "mc-spoke" {
   region                 = module.regions.location
   cidr                   = element(var.address_space, 0)
   account                = data.azurerm_subscription.current.display_name
-  attached = false 
+  attached               = false
   transit_gw             = var.transit_gateway
   enable_max_performance = var.enable_max_performance != false ? var.enable_max_performance : null
   insane_mode            = var.insane_mode
@@ -40,8 +40,8 @@ module "mc-spoke" {
   vpc_id                 = "${module.vnet.vnet_name}:${data.azurerm_resource_group.resource-group.name}:${module.vnet.vnet_guid}"
 }
 
-resource "aviatrix_spoke_transit_attachment" "ingress-spoke" {
-  spoke_gw_name   = module.mc-spoke.spoke_gateway.gw_name
-  transit_gw_name = data.aviatrix_transit_gateway.transit_gateway.gw_name
-  route_tables    = local.route_table_names
-}
+# resource "aviatrix_spoke_transit_attachment" "ingress-spoke" {
+#   spoke_gw_name   = module.mc-spoke.spoke_gateway.gw_name
+#   transit_gw_name = data.aviatrix_transit_gateway.transit_gateway.gw_name
+#   route_tables    = local.route_table_names
+# }

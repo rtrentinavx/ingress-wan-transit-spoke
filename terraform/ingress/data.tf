@@ -57,8 +57,8 @@ data "aviatrix_transit_gateway" "transit_gateway" {
 }
 
 data "azurerm_subnet" "subnets" {
-  for_each = local.subnet_map
-  name                 =  each.value
+  for_each             = local.subnet_map
+  name                 = each.value
   virtual_network_name = module.vnet.vnet_name
   resource_group_name  = data.azurerm_resource_group.resource-group.name
 }
