@@ -11,89 +11,6 @@ module "vnet" {
   tags                = var.tags
 }
 
-resource "azurerm_network_security_group" "publicnetworknsg" {
-  name                = "PublicNetworkSecurityGroup"
-  location            = data.azurerm_resource_group.resource-group.location
-  resource_group_name = data.azurerm_resource_group.resource-group.name
-
-  security_rule {
-    name                       = "AllowAllInbound"
-    priority                   = 1001
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "*"
-    source_port_range          = "*"
-    destination_port_range     = "*"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
-  tags = var.tags
-}
-
-resource "azurerm_network_security_group" "privatenetworknsg" {
-  name                = "PrivateNetworkSecurityGroup"
-  location            = data.azurerm_resource_group.resource-group.location
-  resource_group_name = data.azurerm_resource_group.resource-group.name
-
-  security_rule {
-    name                       = "AllowAllInbound"
-    priority                   = 1001
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "*"
-    source_port_range          = "*"
-    destination_port_range     = "*"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
-  tags = var.tags
-}
-
-resource "azurerm_network_security_rule" "outgoing_public" {
-  name                        = "AllowAllOutbound"
-  priority                    = 100
-  direction                   = "Outbound"
-  access                      = "Allow"
-  protocol                    = "*"
-  source_port_range           = "*"
-  destination_port_range      = "*"
-  source_address_prefix       = "*"
-  destination_address_prefix  = "*"
-  resource_group_name         = data.azurerm_resource_group.resource-group.name
-  network_security_group_name = azurerm_network_security_group.publicnetworknsg.name
-}
-
-resource "azurerm_network_security_rule" "outgoing_private" {
-  name                        = "AllowAllOutbound"
-  priority                    = 100
-  direction                   = "Outbound"
-  access                      = "Allow"
-  protocol                    = "*"
-  source_port_range           = "*"
-  destination_port_range      = "*"
-  source_address_prefix       = "*"
-  destination_address_prefix  = "*"
-  resource_group_name         = data.azurerm_resource_group.resource-group.name
-  network_security_group_name = azurerm_network_security_group.privatenetworknsg.name
-}
-
-resource "random_id" "randomId" {
-  keepers = {
-    resource_group = data.azurerm_resource_group.resource-group.name
-  }
-  byte_length = 8
-}
-
-resource "azurerm_storage_account" "fgtstorageaccount" {
-  name                     = "diag${random_id.randomId.hex}"
-  resource_group_name      = data.azurerm_resource_group.resource-group.name
-  location                 = data.azurerm_resource_group.resource-group.location
-  account_replication_type = "LRS"
-  account_tier             = "Standard"
-  public_network_access_enabled  = false
-  tags                     = var.tags
-}
-
 module "regions" {
   source       = "claranet/regions/azurerm"
   version      = "7.0.0"
@@ -123,8 +40,8 @@ module "mc-spoke" {
   vpc_id                 = "${module.vnet.vnet_name}:${data.azurerm_resource_group.resource-group.name}:${module.vnet.vnet_guid}"
 }
 
-# resource "aviatrix_spoke_transit_attachment" "ingress-spoke" {
-#   spoke_gw_name   = module.mc-spoke.spoke_gateway.name
-#   transit_gw_name = data.aviatrix_transit_gateway.transit_gateway.gw_name
-#   route_tables    = azurerm_route_table.route_table.name[*]
-# }
+resource "aviatrix_spoke_transit_attachment" "ingress-spoke" {
+  spoke_gw_name   = module.mc-spoke.spoke_gateway.gw_name
+  transit_gw_name = data.aviatrix_transit_gateway.transit_gateway.gw_name
+  route_tables    = local.route_table_names
+}

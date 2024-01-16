@@ -56,7 +56,7 @@ data "aviatrix_transit_gateway" "transit_gateway" {
   gw_name = var.transit_gateway
 }
 
-data "azurerm_subnet" "example" {
+data "azurerm_subnet" "subnets" {
   for_each = local.subnet_map
   name                 =  each.value
   virtual_network_name = module.vnet.vnet_name

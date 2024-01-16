@@ -5,7 +5,8 @@ locals {
     "10.0.0.0-8" = "10.0.0.0/8", 
   }
   subnet_map = { for idx, name in var.subnet_names : idx => name }
-}
+  route_table_names = [for rt in azurerm_route_table.route_table : rt.name ]
+  }
 
 resource "azurerm_route_table" "route_table" {
     for_each = local.subnet_map
@@ -25,8 +26,8 @@ resource "azurerm_route" "route-rfc1918" {
     next_hop_in_ip_address = module.loadbalancer-internal.azurerm_lb_frontend_ip_configuration[0].private_ip_address
 }
 
-# resource "azurerm_subnet_route_table_association" "route_table-association" {
-#     for_each = local.subnet_map
-#     subnet_id      = 
-#     route_table_id = azurerm_route_table.route_table[each.key].id
-# }
+resource "azurerm_subnet_route_table_association" "route_table-association" {
+    for_each = local.subnet_map
+    subnet_id      = data.azurerm_subnet.subnets[each.key].id
+    route_table_id = azurerm_route_table.route_table[each.key].id
+}
