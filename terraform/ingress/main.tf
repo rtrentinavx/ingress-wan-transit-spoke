@@ -11,28 +11,6 @@ module "vnet" {
   tags                = var.tags
 }
 
-resource "azurerm_public_ip" "firewall-1-MGMTIP" {
-  count               = var.management == "public" ? 1 : 0
-  name                = "firewall-1-MGMTIP"
-  location            = data.azurerm_resource_group.resource-group.location
-  resource_group_name = data.azurerm_resource_group.resource-group.name
-  allocation_method   = "Static"
-  sku                 = "Standard"
-  sku_tier            = "Regional"
-  tags                = var.tags
-}
-
-resource "azurerm_public_ip" "firewall-2-MGMTIP" {
-  count               = var.management == "public" ? 1 : 0
-  name                = "firewall-2-MGMTIP"
-  location            = data.azurerm_resource_group.resource-group.location
-  resource_group_name = data.azurerm_resource_group.resource-group.name
-  allocation_method   = "Static"
-  sku                 = "Standard"
-  sku_tier            = "Regional"
-  tags                = var.tags
-}
-
 resource "azurerm_network_security_group" "publicnetworknsg" {
   name                = "PublicNetworkSecurityGroup"
   location            = data.azurerm_resource_group.resource-group.location
@@ -99,100 +77,6 @@ resource "azurerm_network_security_rule" "outgoing_private" {
   network_security_group_name = azurerm_network_security_group.privatenetworknsg.name
 }
 
-resource "azurerm_network_interface" "firewall-1-port1" {
-  name                          = "firewall-1-port1"
-  location                      = data.azurerm_resource_group.resource-group.location
-  resource_group_name           = data.azurerm_resource_group.resource-group.name
-  enable_accelerated_networking = var.accelerate == "true" ? true : false
-  enable_ip_forwarding          = true
-
-  ip_configuration {
-    name                          = "ipconfig1"
-    subnet_id                     = module.vnet.vnet_subnets_name_id["publicsubnet"]
-    private_ip_address_allocation = "Static"
-    private_ip_address            = cidrhost(var.subnet_prefixes[3], 5)
-    primary                       = true
-    public_ip_address_id          = var.management == "public" ? azurerm_public_ip.firewall-1-MGMTIP[0].id : null
-  }
-  tags = var.tags
-}
-
-resource "azurerm_network_interface" "firewall-1-port2" {
-  name                          = "firewall-1-port2"
-  location                      = data.azurerm_resource_group.resource-group.location
-  resource_group_name           = data.azurerm_resource_group.resource-group.name
-  enable_ip_forwarding          = true
-  enable_accelerated_networking = var.accelerate == "true" ? true : false
-
-  ip_configuration {
-    name                          = "ipconfig1"
-    subnet_id                     = module.vnet.vnet_subnets_name_id["privatesubnet-1"]
-    private_ip_address_allocation = "Static"
-    private_ip_address            = cidrhost(var.subnet_prefixes[4], 5)
-  }
-  tags = var.tags
-}
-
-
-resource "azurerm_network_interface_security_group_association" "firewall-1-port1nsg" {
-  depends_on                = [azurerm_network_interface.firewall-1-port1]
-  network_interface_id      = azurerm_network_interface.firewall-1-port1.id
-  network_security_group_id = azurerm_network_security_group.publicnetworknsg.id
-}
-
-resource "azurerm_network_interface_security_group_association" "firewall-1-port2nsg" {
-  depends_on                = [azurerm_network_interface.firewall-1-port2]
-  network_interface_id      = azurerm_network_interface.firewall-1-port2.id
-  network_security_group_id = azurerm_network_security_group.privatenetworknsg.id
-}
-
-resource "azurerm_network_interface" "firewall-2-port1" {
-  name                          = "firewall-2-port1"
-  location                      = data.azurerm_resource_group.resource-group.location
-  resource_group_name           = data.azurerm_resource_group.resource-group.name
-  enable_accelerated_networking = var.accelerate == "true" ? true : false
-  enable_ip_forwarding          = true
-
-  ip_configuration {
-    name                          = "ipconfig1"
-    subnet_id                     = module.vnet.vnet_subnets_name_id["publicsubnet"]
-    private_ip_address_allocation = "Static"
-    private_ip_address            = cidrhost(var.subnet_prefixes[3], 6)
-    primary                       = true
-    public_ip_address_id          = var.management == "public" ? azurerm_public_ip.firewall-2-MGMTIP[0].id : null
-  }
-  tags = var.tags
-}
-
-resource "azurerm_network_interface" "firewall-2-port2" {
-  name                          = "firewall-2-port2"
-  location                      = data.azurerm_resource_group.resource-group.location
-  resource_group_name           = data.azurerm_resource_group.resource-group.name
-  enable_ip_forwarding          = true
-  enable_accelerated_networking = var.accelerate == "true" ? true : false
-
-  ip_configuration {
-    name                          = "ipconfig1"
-    subnet_id                     = module.vnet.vnet_subnets_name_id["privatesubnet-2"]
-    private_ip_address_allocation = "Static"
-    private_ip_address            = cidrhost(var.subnet_prefixes[5], 6)
-  }
-  tags = var.tags
-}
-
-
-resource "azurerm_network_interface_security_group_association" "firewall-2-port1nsg" {
-  depends_on                = [azurerm_network_interface.firewall-2-port1]
-  network_interface_id      = azurerm_network_interface.firewall-2-port1.id
-  network_security_group_id = azurerm_network_security_group.publicnetworknsg.id
-}
-
-resource "azurerm_network_interface_security_group_association" "firewall-2-port2nsg" {
-  depends_on                = [azurerm_network_interface.firewall-2-port2]
-  network_interface_id      = azurerm_network_interface.firewall-2-port2.id
-  network_security_group_id = azurerm_network_security_group.privatenetworknsg.id
-}
-
 resource "random_id" "randomId" {
   keepers = {
     resource_group = data.azurerm_resource_group.resource-group.name
@@ -225,6 +109,7 @@ module "mc-spoke" {
   region                 = module.regions.location
   cidr                   = element(var.address_space, 0)
   account                = data.azurerm_subscription.current.display_name
+  attached = false 
   transit_gw             = var.transit_gateway
   enable_max_performance = var.enable_max_performance != false ? var.enable_max_performance : null
   insane_mode            = var.insane_mode
@@ -238,3 +123,8 @@ module "mc-spoke" {
   vpc_id                 = "${module.vnet.vnet_name}:${data.azurerm_resource_group.resource-group.name}:${module.vnet.vnet_guid}"
 }
 
+# resource "aviatrix_spoke_transit_attachment" "ingress-spoke" {
+#   spoke_gw_name   = module.mc-spoke.spoke_gateway.name
+#   transit_gw_name = data.aviatrix_transit_gateway.transit_gateway.gw_name
+#   route_tables    = azurerm_route_table.route_table.name[*]
+# }

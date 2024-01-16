@@ -55,3 +55,10 @@ data "azurerm_key_vault_secret" "secret-appgw-cert" {
 data "aviatrix_transit_gateway" "transit_gateway" {
   gw_name = var.transit_gateway
 }
+
+data "azurerm_subnet" "example" {
+  for_each = local.subnet_map
+  name                 =  each.value
+  virtual_network_name = module.vnet.vnet_name
+  resource_group_name  = data.azurerm_resource_group.resource-group.name
+}
