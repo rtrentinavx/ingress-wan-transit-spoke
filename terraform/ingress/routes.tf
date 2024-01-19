@@ -1,7 +1,7 @@
 locals {
   rfc1918           = { "192.168.0.0-16" = "192.168.0.0/16", "172.16.0.0-12" = "172.16.0.0/12", "10.0.0.0-8" = "10.0.0.0/8", }
   subnet_map        = { for idx, name in var.subnet_names : idx => name }
-  route_table_names = [for rt in azurerm_route_table.route_table : "${rt.name}:${data.azurerm_resource_group.resource-group.name}" if rt.name != azurerm_route_table.route_table["2"].name ]
+  route_table_names = [for rt in azurerm_route_table.route_table : "${rt.name}:${data.azurerm_resource_group.resource-group.name}" if rt.name != azurerm_route_table.route_table["2"].name]
 }
 
 resource "azurerm_route_table" "route_table" {

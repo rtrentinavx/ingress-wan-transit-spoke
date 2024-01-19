@@ -8,12 +8,26 @@ locals {
   redirect_configuration_name    = "${module.vnet.vnet_name}-rdrcfg"
 }
 
+resource "azurerm_user_assigned_identity" "appgw_user_assigned" {
+  location            = data.azurerm_resource_group.resource-group.location
+  resource_group_name = data.azurerm_resource_group.resource-group.name
+  name                = "user-assigned-identity-${var.appgw_name}"
+  tags                = var.tags
+}
+
+resource "azurerm_role_assignment" "appgw_user_assigned_role_assignment" {
+  scope                = data.azurerm_key_vault.keyvault.id
+  role_definition_name = "Key Vault Secrets User"
+  principal_id         = azurerm_user_assigned_identity.appgw_user_assigned.id
+}
+
 resource "azurerm_public_ip" "pip-appgw" {
   name                = "pip-${var.appgw_name}"
   resource_group_name = data.azurerm_resource_group.resource-group.name
   location            = data.azurerm_resource_group.resource-group.location
   allocation_method   = "Static"
   sku                 = "Standard"
+  tags                = var.tags
 }
 
 resource "azurerm_application_gateway" "appgw" {
@@ -21,10 +35,22 @@ resource "azurerm_application_gateway" "appgw" {
   resource_group_name = data.azurerm_resource_group.resource-group.name
   location            = data.azurerm_resource_group.resource-group.location
 
+  identity {
+    type         = "UserAssigned"
+    identity_ids = [azurerm_user_assigned_identity.appgw_user_assigned.id]
+  }
+
+  ssl_certificate {
+    name                = data.azurerm_key_vault_certificate.cert.name
+    key_vault_secret_id = data.azurerm_key_vault_certificate.cert.secret_id
+  }
+
   sku {
     name     = var.appgw_sku_size
     tier     = var.appgw_sku_tier
     capacity = var.appgw_sku_capacity
+    #Possible values are Standard_Small, Standard_Medium, Standard_Large, Standard_v2, WAF_Medium, WAF_Large, and WAF_v2.
+    #Possible values are Standard, Standard_v2, WAF and WAF_v2.
   }
 
   gateway_ip_configuration {
@@ -76,6 +102,7 @@ resource "azurerm_application_gateway" "appgw" {
     frontend_ip_configuration_name = local.frontend_ip_configuration_name
     frontend_port_name             = local.frontend_port_name
     protocol                       = var.appgw_fe-protocol
+    ssl_certificate_name           = var.appgw_fe-protocol == "Https" ? data.azurerm_key_vault_certificate.cert.name : null
   }
 
   request_routing_rule {
@@ -86,4 +113,13 @@ resource "azurerm_application_gateway" "appgw" {
     backend_address_pool_name  = local.backend_address_pool_name
     backend_http_settings_name = local.http_setting_name
   }
+
+  waf_configuration {
+    enabled          = var.appgw_sku_tier == "WAF_v2" ? true : false
+    firewall_mode    = "detection"
+    rule_set_version = "3.2"
+    #Possible values are 0.1, 1.0, 2.1, 2.2.9, 3.0, 3.1 and 3.2. 
+  }
+
+  tags = var.tags
 }

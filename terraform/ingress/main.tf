@@ -40,8 +40,8 @@ module "mc-spoke" {
   vpc_id                 = "${module.vnet.vnet_name}:${data.azurerm_resource_group.resource-group.name}:${module.vnet.vnet_guid}"
 }
 
-# resource "aviatrix_spoke_transit_attachment" "ingress-spoke" {
-#   spoke_gw_name   = module.mc-spoke.spoke_gateway.gw_name
-#   transit_gw_name = data.aviatrix_transit_gateway.transit_gateway.gw_name
-#   route_tables    = local.route_table_names
-# }
+resource "aviatrix_spoke_transit_attachment" "ingress-spoke" {
+  spoke_gw_name   = module.mc-spoke.spoke_gateway.gw_name
+  transit_gw_name = data.aviatrix_transit_gateway.transit_gateway.gw_name
+  route_tables    = local.route_table_names
+}

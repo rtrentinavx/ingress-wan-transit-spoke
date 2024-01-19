@@ -47,8 +47,8 @@ data "azurerm_key_vault_secret" "secret-forti_client_secret" {
   key_vault_id = data.azurerm_key_vault.keyvault.id
 }
 
-data "azurerm_key_vault_secret" "secret-appgw-cert" {
-  name         = "appgw-cert"
+data "azurerm_key_vault_certificate" "cert" {
+  name         = var.cert 
   key_vault_id = data.azurerm_key_vault.keyvault.id
 }
 
@@ -57,6 +57,7 @@ data "aviatrix_transit_gateway" "transit_gateway" {
 }
 
 data "azurerm_subnet" "subnets" {
+  depends_on           = [module.vnet]
   for_each             = local.subnet_map
   name                 = each.value
   virtual_network_name = module.vnet.vnet_name
